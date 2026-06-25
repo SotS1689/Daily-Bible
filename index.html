@@ -6,42 +6,40 @@
     <title>Language Learning Habit Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans select-none">
+<body class="bg-slate-900 text-slate-100 h-screen max-h-screen overflow-hidden font-sans select-none p-4 flex flex-col">
 
-    <div class="w-full min-h-screen px-4 md:px-8 py-6 flex flex-col">
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-3 mb-4 gap-3 shrink-0">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight">Daily Language Feed</h1>
+            <p class="text-slate-400 text-xs mt-0.5">Keep your daily translation streaks alive.</p>
+        </div>
         
-        <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6 mb-8 gap-4 w-full">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 min-w-[220px] shadow-md flex items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight">Daily Language Feed</h1>
-                <p class="text-slate-400 text-sm mt-1">Keep your daily translation streaks alive.</p>
-            </div>
-            
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 min-w-[240px] shadow-md">
-                <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Monthly Performance</div>
-                <div class="flex items-baseline gap-2 mt-1">
-                    <span id="perf-percentage" class="text-3xl font-extrabold text-indigo-400">0%</span>
-                    <span class="text-xs text-slate-500">of days completed</span>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Monthly Performance</div>
+                <div class="flex items-baseline gap-1.5 mt-0.5">
+                    <span id="perf-percentage" class="text-2xl font-extrabold text-indigo-400">0%</span>
+                    <span id="perf-meta" class="text-[10px] text-slate-500">0 of 0 days</span>
                 </div>
-                <div class="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
-                    <div id="perf-bar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-                <div id="perf-meta" class="text-[11px] text-slate-400 mt-2"></div>
             </div>
-        </header>
+            <div class="flex-1 bg-slate-700 h-2 rounded-full overflow-hidden min-w-[60px]">
+                <div id="perf-bar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
 
-        <main class="w-full grow flex flex-col">
-            <div class="flex items-center justify-between mb-6 w-full">
-                <h2 class="text-xl font-semibold text-slate-200">Today's Lessons</h2>
-                <button id="refresh-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
-                    Refresh Feed
-                </button>
-            </div>
-
-            <div id="video-feed" class="w-full grow transition-all duration-300">
-                <p class="text-slate-500 text-sm italic text-center py-12 animate-pulse">Loading latest videos...</p>
-            </div>
-        </main>
+    <div class="flex items-center justify-between mb-3 shrink-0">
+        <h2 class="text-lg font-semibold text-slate-200">Today's Lessons</h2>
+        <button id="refresh-btn" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
+            Refresh Feed
+        </button>
     </div>
+
+    <main id="workspace" class="flex-1 min-h-0 w-full flex flex-col">
+        <div id="video-feed" class="w-full h-full min-h-0 flex items-center justify-center">
+            <p class="text-slate-500 text-sm italic animate-pulse">Loading latest videos...</p>
+        </div>
+    </main>
 
     <script>
         // --- CHANNELS CONFIGURATION ---
@@ -51,27 +49,22 @@
             { name: "Daily Dose of Latin", id: "UCMldVrQ8rKkWyevvQonijoA" }
         ];
 
-        // --- STORAGE KEYS ---
         const STORAGE_KEY_WATCHED = "yt_tracker_watched_videos";
         const STORAGE_KEY_HISTORY = "yt_tracker_daily_history";
 
-        // --- STATE MANAGEMENT ---
         let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
         let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
         let currentVideos = [];
-        let activeVideoId = null; // Tracks which video is currently maximized
+        let activeVideoId = null;
 
-        // --- DOM ELEMENTS ---
         const videoFeed = document.getElementById("video-feed");
         const perfPercentage = document.getElementById("perf-percentage");
         const perfBar = document.getElementById("perf-bar");
         const perfMeta = document.getElementById("perf-meta");
         const refreshBtn = document.getElementById("refresh-btn");
 
-        // --- CORE FUNCTIONS ---
-
         async function fetchFeed() {
-            videoFeed.className = "w-full text-center py-12";
+            videoFeed.className = "w-full h-full flex items-center justify-center";
             videoFeed.innerHTML = '<p class="text-slate-400 text-sm italic animate-pulse">Fetching latest channel updates...</p>';
             
             const fetchPromises = CHANNELS.map(async (channel) => {
@@ -101,50 +94,43 @@
                     throw new Error("No entries found in RSS feed");
                 } catch (error) {
                     console.error(`Failed to fetch channel: ${channel.name}`, error);
-                    return {
-                        channelName: channel.name,
-                        error: true
-                    };
+                    return { channelName: channel.name, error: true };
                 }
             });
 
             const results = await Promise.all(fetchPromises);
-            window.cachedResults = results; // Cache locally to prevent unnecessary proxy re-fetching on layout swaps
+            window.cachedResults = results;
             currentVideos = results.filter(item => !item.error);
             
             renderFeed(results);
             checkAndLogDailyCompletion();
         }
 
-        // Handles conditional structure partitioning (Standard Grid vs Theater Split)
         function renderFeed(allResults) {
             videoFeed.innerHTML = "";
-            
-            // Check if theater mode target is active and valid
             const hasActiveVideo = activeVideoId && allResults.some(item => !item.error && item.videoId === activeVideoId);
             
             if (!hasActiveVideo) {
-                // STATE 1: Default 3-Column Horizontal Grid
-                videoFeed.className = "grid gap-6 md:grid-cols-3 w-full items-start";
-                
+                // STATE 1: Standard 3-Column Grid stretched to exactly match viewport bounds
+                videoFeed.className = "grid gap-4 md:grid-cols-3 w-full h-full min-h-0 items-stretch";
                 allResults.forEach(item => {
-                    videoFeed.appendChild(createCardElement(item, false));
+                    videoFeed.appendChild(createCardElement(item, false, false));
                 });
             } else {
-                // STATE 2: Theater Mode (Split Column layout)
-                videoFeed.className = "flex flex-col lg:flex-row gap-6 w-full items-start";
+                // STATE 2: Theater Split Row with vertical sidebar stacking
+                videoFeed.className = "flex flex-col lg:flex-row gap-4 w-full h-full min-h-0 items-stretch";
                 
                 const mainStage = document.createElement("div");
-                mainStage.className = "w-full lg:w-3/4 flex flex-col";
+                mainStage.className = "w-full lg:w-3/4 h-full flex flex-col min-h-0";
                 
                 const sidebar = document.createElement("div");
-                sidebar.className = "w-full lg:w-1/4 flex flex-col gap-4";
+                sidebar.className = "w-full lg:w-1/4 h-full flex flex-col gap-3 min-h-0";
                 
                 allResults.forEach(item => {
                     if (!item.error && item.videoId === activeVideoId) {
-                        mainStage.appendChild(createCardElement(item, true));
+                        mainStage.appendChild(createCardElement(item, true, false));
                     } else {
-                        sidebar.appendChild(createCardElement(item, false));
+                        sidebar.appendChild(createCardElement(item, false, true));
                     }
                 });
                 
@@ -153,48 +139,43 @@
             }
         }
 
-        // Generates structural HTML elements programmatically
-        function createCardElement(item, isActive) {
+        function createCardElement(item, isActive, isSidebar) {
             const card = document.createElement("div");
             
             if (item.error) {
-                card.className = "p-4 border border-red-900/50 bg-red-950/20 rounded-xl flex flex-col justify-between shadow-sm min-h-[250px] w-full";
-                card.innerHTML = `
-                    <div>
-                        <span class="text-[11px] font-bold tracking-wider uppercase text-red-400 block mb-1">${item.channelName}</span>
-                        <h3 class="font-medium text-sm text-slate-300 mt-2">Failed to load feed</h3>
-                    </div>
-                `;
+                card.className = `p-3 border border-red-900/40 bg-red-950/10 rounded-xl flex flex-col justify-center items-center shadow-sm h-full w-full ${isSidebar ? 'flex-1 min-h-0' : ''}`;
+                card.innerHTML = `<span class="text-[10px] font-bold uppercase text-red-400">${item.channelName}</span><p class="text-xs text-slate-400 mt-1">Failed to load</p>`;
                 return card;
             }
 
             const isWatched = watchedVideos.includes(item.videoId);
             
-            card.className = `p-4 border rounded-xl flex flex-col justify-between transition shadow-md w-full ${
-                isActive ? 'bg-slate-800 border-indigo-500/50 ring-1 ring-indigo-500/20' : 
-                isWatched ? 'bg-slate-900/40 border-slate-800 opacity-50' : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            // Sidebar entries use flex-1 min-h-0 to share vertical space equally without overflowing
+            card.className = `p-3 border rounded-xl flex flex-col justify-between transition shadow-md w-full min-h-0 ${
+                isActive ? 'bg-slate-800 border-indigo-500 ring-1 ring-indigo-500/20 h-full' : 
+                isSidebar ? 'bg-slate-800/90 border-slate-700 hover:border-slate-600 flex-1' :
+                isWatched ? 'bg-slate-900/40 border-slate-800 opacity-40 h-full' : 'bg-slate-800 border-slate-700 hover:border-slate-600 h-full'
             }`;
 
-            // Check if tracking item needs to include autoplay
             const embedSrc = isActive ? `https://www.youtube.com/embed/${item.videoId}?autoplay=1` : `https://www.youtube.com/embed/${item.videoId}`;
 
             card.innerHTML = `
-                <div class="w-full">
-                    <div class="flex items-center justify-between gap-2 mb-1">
-                        <span class="text-[11px] font-bold tracking-wider uppercase text-indigo-400 block">${item.channelName}</span>
+                <div class="w-full flex flex-col flex-1 min-h-0">
+                    <div class="flex items-center justify-between gap-2 shrink-0">
+                        <span class="text-[10px] font-bold tracking-wider uppercase text-indigo-400 block">${item.channelName}</span>
                         ${isActive ? `
-                            <button onclick="minimizeVideo(event)" class="text-slate-400 hover:text-slate-200 p-1 rounded hover:bg-slate-700/50 transition cursor-pointer" title="Exit Theater Mode">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3 3m12 6V4.5M15 9h4.5M15 9l6-6M9 15v4.5M9 15H4.5M9 15l-6 6m12-5.5V20.5M15 15h4.5M15 15l6 6"/></svg>
+                            <button onclick="minimizeVideo(event)" class="text-slate-400 hover:text-slate-200 p-1 rounded hover:bg-slate-700/50 transition cursor-pointer" title="Exit Theater">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3 3m12 6V4.5M15 9h4.5M15 9l6-6M9 15v4.5M9 15H4.5M9 15l-6 6m12-5.5V20.5M15 15h4.5M15 15l6 6"/></svg>
                             </button>
                         ` : ''}
                     </div>
-                    <h3 class="font-medium ${isActive ? 'text-lg' : 'text-sm'} text-slate-100 line-clamp-1 mb-3" title="${item.title}">
+                    <h3 class="font-medium text-xs text-slate-100 line-clamp-1 mt-0.5 mb-2 shrink-0" title="${item.title}">
                         ${item.title}
                     </h3>
                     
-                    <div class="relative aspect-video w-full mb-4 rounded-lg overflow-hidden bg-black shadow-inner group">
+                    <div class="relative flex-1 w-full bg-black shadow-inner rounded-lg overflow-hidden min-h-0 group">
                         <iframe 
-                            class="w-full h-full"
+                            class="w-full h-full absolute inset-0"
                             src="${embedSrc}" 
                             title="${item.title}" 
                             frameborder="0" 
@@ -203,19 +184,19 @@
                         </iframe>
                         
                         ${!isActive ? `
-                            <div onclick="maximizeVideo('${item.videoId}')" class="absolute inset-0 bg-slate-950/10 hover:bg-slate-950/0 transition-all duration-200 cursor-pointer flex items-center justify-center">
-                                <div class="bg-indigo-600/90 text-white p-3 rounded-full scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 shadow-xl">
-                                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                            <div onclick="maximizeVideo('${item.videoId}')" class="absolute inset-0 bg-slate-950/20 hover:bg-slate-950/0 transition-all duration-150 cursor-pointer flex items-center justify-center z-10">
+                                <div class="bg-indigo-600/90 text-white p-2.5 rounded-full scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 shadow-xl">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                                 </div>
                             </div>
                         ` : ''}
                     </div>
                 </div>
-                <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-700/50 w-full">
-                    <span class="text-xs ${isWatched ? 'text-emerald-400 font-medium' : 'text-slate-400'}">
-                        ${isWatched ? '✓ Completed' : 'Unfinished'}
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50 w-full shrink-0">
+                    <span class="text-[11px] ${isWatched ? 'text-emerald-400 font-medium' : 'text-slate-400'}">
+                        ${isWatched ? '✓ Done' : 'Unfinished'}
                     </span>
-                    <button onclick="toggleWatchStatus('${item.videoId}', event)" class="toggle-btn text-xs px-3 py-1.5 rounded font-medium cursor-pointer transition ${
+                    <button onclick="toggleWatchStatus('${item.videoId}', event)" class="text-[11px] px-2.5 py-1 rounded font-medium cursor-pointer transition shrink-0 ${
                         isWatched ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                     }">
                         ${isWatched ? 'Reset' : 'Mark Done'}
@@ -225,7 +206,6 @@
             return card;
         }
 
-        // --- LAYOUT INTERACTION SWITCHES ---
         window.maximizeVideo = function(id) {
             activeVideoId = id;
             renderFeed(window.cachedResults);
@@ -244,7 +224,6 @@
                 watchedVideos = watchedVideos.filter(vId => vId !== id);
             } else {
                 watchedVideos.push(id);
-                // Minimize if you mark the currently active theater video as finished
                 if (activeVideoId === id) activeVideoId = null;
             }
             localStorage.setItem(STORAGE_KEY_WATCHED, JSON.stringify(watchedVideos));
@@ -253,13 +232,11 @@
             checkAndLogDailyCompletion();
         };
 
-        // --- HISTORY TRACKING ENGINE ---
         function checkAndLogDailyCompletion() {
             const today = new Date().toISOString().split('T')[0];
             if (currentVideos.length === 0) return;
 
             const allDoneToday = currentVideos.every(video => watchedVideos.includes(video.videoId));
-            
             if (allDoneToday) {
                 dailyHistory[today] = true;
             } else {
@@ -277,7 +254,6 @@
             const currentDay = now.getDate();
 
             let completedDaysThisMonth = 0;
-
             for (let d = 1; d <= currentDay; d++) {
                 const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 if (dailyHistory[dateString] === true) {
@@ -286,13 +262,11 @@
             }
 
             const percentage = Math.round((completedDaysThisMonth / currentDay) * 100) || 0;
-
             perfPercentage.textContent = `${percentage}%`;
             perfBar.style.width = `${percentage}%`;
-            perfMeta.textContent = `${completedDaysThisMonth} of ${currentDay} days finalized this month.`;
+            perfMeta.textContent = `${completedDaysThisMonth} of ${currentDay} days`;
         }
 
-        // --- INITIALIZATION ---
         refreshBtn.addEventListener("click", fetchFeed);
         fetchFeed();
     </script>
