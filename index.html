@@ -6,10 +6,11 @@
     <title>Language Learning Habit Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans select-none">
 
-    <div class="max-w-6xl mx-auto p-6">
-        <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+    <div class="w-full min-h-screen px-4 md:px-8 py-6 flex flex-col">
+        
+        <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6 mb-8 gap-4 w-full">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Daily Language Feed</h1>
                 <p class="text-slate-400 text-sm mt-1">Keep your daily translation streaks alive.</p>
@@ -28,16 +29,16 @@
             </div>
         </header>
 
-        <main>
-            <div class="flex items-center justify-between mb-6">
+        <main class="w-full grow flex flex-col">
+            <div class="flex items-center justify-between mb-6 w-full">
                 <h2 class="text-xl font-semibold text-slate-200">Today's Lessons</h2>
                 <button id="refresh-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
                     Refresh Feed
                 </button>
             </div>
 
-            <div id="video-feed" class="grid gap-6 md:grid-cols-3">
-                <p class="text-slate-500 text-sm italic col-span-3 text-center py-12 animate-pulse">Loading latest videos...</p>
+            <div id="video-feed" class="w-full grow transition-all duration-300">
+                <p class="text-slate-500 text-sm italic text-center py-12 animate-pulse">Loading latest videos...</p>
             </div>
         </main>
     </div>
@@ -58,6 +59,7 @@
         let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
         let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
         let currentVideos = [];
+        let activeVideoId = null; // Tracks which video is currently maximized
 
         // --- DOM ELEMENTS ---
         const videoFeed = document.getElementById("video-feed");
@@ -68,15 +70,13 @@
 
         // --- CORE FUNCTIONS ---
 
-        // Fetch latest videos in parallel using a more robust proxy
         async function fetchFeed() {
-            videoFeed.innerHTML = '<p class="text-slate-400 text-sm italic col-span-3 py-12 text-center animate-pulse">Fetching latest channel updates...</p>';
+            videoFeed.className = "w-full text-center py-12";
+            videoFeed.innerHTML = '<p class="text-slate-400 text-sm italic animate-pulse">Fetching latest channel updates...</p>';
             
-            // Fire off all fetch requests simultaneously
             const fetchPromises = CHANNELS.map(async (channel) => {
                 try {
                     const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-                    // Switched to corsproxy.io for better speed/reliability
                     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
                     
                     const response = await fetch(proxyUrl);
@@ -101,7 +101,6 @@
                     throw new Error("No entries found in RSS feed");
                 } catch (error) {
                     console.error(`Failed to fetch channel: ${channel.name}`, error);
-                    // Return placeholder with error flag so the UI can log it cleanly
                     return {
                         channelName: channel.name,
                         error: true
@@ -109,99 +108,154 @@
                 }
             });
 
-            // Wait for all channels to finish processing concurrently
             const results = await Promise.all(fetchPromises);
-            
-            // Keep track of valid video returns
+            window.cachedResults = results; // Cache locally to prevent unnecessary proxy re-fetching on layout swaps
             currentVideos = results.filter(item => !item.error);
             
             renderFeed(results);
             checkAndLogDailyCompletion();
         }
 
-        // Render videos and inline player frames to dashboard
+        // Handles conditional structure partitioning (Standard Grid vs Theater Split)
         function renderFeed(allResults) {
             videoFeed.innerHTML = "";
             
-            allResults.forEach(item => {
-                const card = document.createElement("div");
+            // Check if theater mode target is active and valid
+            const hasActiveVideo = activeVideoId && allResults.some(item => !item.error && item.videoId === activeVideoId);
+            
+            if (!hasActiveVideo) {
+                // STATE 1: Default 3-Column Horizontal Grid
+                videoFeed.className = "grid gap-6 md:grid-cols-3 w-full items-start";
                 
-                // Handle Error Card UI State
-                if (item.error) {
-                    card.className = "p-4 border border-red-900/50 bg-red-950/20 rounded-xl flex flex-col justify-between shadow-sm min-h-[250px]";
-                    card.innerHTML = `
-                        <div>
-                            <span class="text-[11px] font-bold tracking-wider uppercase text-red-400 block mb-1">${item.channelName}</span>
-                            <h3 class="font-medium text-sm text-slate-300 mt-2">Failed to load feed</h3>
-                            <p class="text-xs text-slate-500 mt-1">The CORS proxy timed out or rate-limited this request.</p>
-                        </div>
-                        <div class="text-xs text-slate-500 italic mt-auto pt-3 border-t border-slate-800">
-                            Try clicking Refresh Feed above.
-                        </div>
-                    `;
-                    videoFeed.appendChild(card);
-                    return;
-                }
-
-                // Handle Standard Video Card UI State
-                const isWatched = watchedVideos.includes(item.videoId);
-                card.className = `p-4 border rounded-xl flex flex-col justify-between transition shadow-md ${
-                    isWatched ? 'bg-slate-900/40 border-slate-800 opacity-60' : 'bg-slate-800 border-slate-700 hover:border-slate-600'
-                }`;
-
-                card.innerHTML = `
-                    <div>
-                        <span class="text-[11px] font-bold tracking-wider uppercase text-indigo-400 block mb-1">${item.channelName}</span>
-                        <h3 class="font-medium text-sm text-slate-100 line-clamp-1 mb-3" title="${item.title}">
-                            ${item.title}
-                        </h3>
-                        
-                        <div class="aspect-video w-full mb-4 rounded-lg overflow-hidden bg-black shadow-inner">
-                            <iframe 
-                                class="w-full h-full"
-                                src="https://www.youtube.com/embed/${item.videoId}" 
-                                title="${item.title}" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                allowfullscreen>
-                            </iframe>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-700/50">
-                        <span class="text-xs ${isWatched ? 'text-emerald-400 font-medium' : 'text-slate-400'}">
-                            ${isWatched ? '✓ Completed' : 'Unfinished'}
-                        </span>
-                        <button class="toggle-btn text-xs px-3 py-1.5 rounded font-medium cursor-pointer transition ${
-                            isWatched ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                        }">
-                            ${isWatched ? 'Reset' : 'Mark Done'}
-                        </button>
-                    </div>
-                `;
-
-                card.querySelector(".toggle-btn").addEventListener("click", () => {
-                    toggleWatchStatus(item.videoId);
+                allResults.forEach(item => {
+                    videoFeed.appendChild(createCardElement(item, false));
                 });
-
-                videoFeed.appendChild(card);
-            });
+            } else {
+                // STATE 2: Theater Mode (Split Column layout)
+                videoFeed.className = "flex flex-col lg:flex-row gap-6 w-full items-start";
+                
+                const mainStage = document.createElement("div");
+                mainStage.className = "w-full lg:w-3/4 flex flex-col";
+                
+                const sidebar = document.createElement("div");
+                sidebar.className = "w-full lg:w-1/4 flex flex-col gap-4";
+                
+                allResults.forEach(item => {
+                    if (!item.error && item.videoId === activeVideoId) {
+                        mainStage.appendChild(createCardElement(item, true));
+                    } else {
+                        sidebar.appendChild(createCardElement(item, false));
+                    }
+                });
+                
+                videoFeed.appendChild(mainStage);
+                videoFeed.appendChild(sidebar);
+            }
         }
 
-        function toggleWatchStatus(id) {
+        // Generates structural HTML elements programmatically
+        function createCardElement(item, isActive) {
+            const card = document.createElement("div");
+            
+            if (item.error) {
+                card.className = "p-4 border border-red-900/50 bg-red-950/20 rounded-xl flex flex-col justify-between shadow-sm min-h-[250px] w-full";
+                card.innerHTML = `
+                    <div>
+                        <span class="text-[11px] font-bold tracking-wider uppercase text-red-400 block mb-1">${item.channelName}</span>
+                        <h3 class="font-medium text-sm text-slate-300 mt-2">Failed to load feed</h3>
+                    </div>
+                `;
+                return card;
+            }
+
+            const isWatched = watchedVideos.includes(item.videoId);
+            
+            card.className = `p-4 border rounded-xl flex flex-col justify-between transition shadow-md w-full ${
+                isActive ? 'bg-slate-800 border-indigo-500/50 ring-1 ring-indigo-500/20' : 
+                isWatched ? 'bg-slate-900/40 border-slate-800 opacity-50' : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            }`;
+
+            // Check if tracking item needs to include autoplay
+            const embedSrc = isActive ? `https://www.youtube.com/embed/${item.videoId}?autoplay=1` : `https://www.youtube.com/embed/${item.videoId}`;
+
+            card.innerHTML = `
+                <div class="w-full">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="text-[11px] font-bold tracking-wider uppercase text-indigo-400 block">${item.channelName}</span>
+                        ${isActive ? `
+                            <button onclick="minimizeVideo(event)" class="text-slate-400 hover:text-slate-200 p-1 rounded hover:bg-slate-700/50 transition cursor-pointer" title="Exit Theater Mode">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3 3m12 6V4.5M15 9h4.5M15 9l6-6M9 15v4.5M9 15H4.5M9 15l-6 6m12-5.5V20.5M15 15h4.5M15 15l6 6"/></svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                    <h3 class="font-medium ${isActive ? 'text-lg' : 'text-sm'} text-slate-100 line-clamp-1 mb-3" title="${item.title}">
+                        ${item.title}
+                    </h3>
+                    
+                    <div class="relative aspect-video w-full mb-4 rounded-lg overflow-hidden bg-black shadow-inner group">
+                        <iframe 
+                            class="w-full h-full"
+                            src="${embedSrc}" 
+                            title="${item.title}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" 
+                            allowfullscreen>
+                        </iframe>
+                        
+                        ${!isActive ? `
+                            <div onclick="maximizeVideo('${item.videoId}')" class="absolute inset-0 bg-slate-950/10 hover:bg-slate-950/0 transition-all duration-200 cursor-pointer flex items-center justify-center">
+                                <div class="bg-indigo-600/90 text-white p-3 rounded-full scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 shadow-xl">
+                                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-700/50 w-full">
+                    <span class="text-xs ${isWatched ? 'text-emerald-400 font-medium' : 'text-slate-400'}">
+                        ${isWatched ? '✓ Completed' : 'Unfinished'}
+                    </span>
+                    <button onclick="toggleWatchStatus('${item.videoId}', event)" class="toggle-btn text-xs px-3 py-1.5 rounded font-medium cursor-pointer transition ${
+                        isWatched ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                    }">
+                        ${isWatched ? 'Reset' : 'Mark Done'}
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        // --- LAYOUT INTERACTION SWITCHES ---
+        window.maximizeVideo = function(id) {
+            activeVideoId = id;
+            renderFeed(window.cachedResults);
+        };
+
+        window.minimizeVideo = function(event) {
+            if(event) event.stopPropagation();
+            activeVideoId = null;
+            renderFeed(window.cachedResults);
+        };
+
+        window.toggleWatchStatus = function(id, event) {
+            if(event) event.stopPropagation();
+            
             if (watchedVideos.includes(id)) {
                 watchedVideos = watchedVideos.filter(vId => vId !== id);
             } else {
                 watchedVideos.push(id);
+                // Minimize if you mark the currently active theater video as finished
+                if (activeVideoId === id) activeVideoId = null;
             }
             localStorage.setItem(STORAGE_KEY_WATCHED, JSON.stringify(watchedVideos));
             
-            fetchFeed(); // Re-fetch or re-render keeping current structures intact
-        }
+            renderFeed(window.cachedResults);
+            checkAndLogDailyCompletion();
+        };
 
+        // --- HISTORY TRACKING ENGINE ---
         function checkAndLogDailyCompletion() {
             const today = new Date().toISOString().split('T')[0];
-            
-            // If any active channels completely failed to load, don't auto-penalize or auto-clear history
             if (currentVideos.length === 0) return;
 
             const allDoneToday = currentVideos.every(video => watchedVideos.includes(video.videoId));
