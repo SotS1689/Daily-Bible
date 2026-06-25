@@ -68,71 +68,99 @@
 
         // --- CORE FUNCTIONS ---
 
-        // Fetch latest video via a CORS proxy for each channel
+        // Fetch latest videos in parallel using a more robust proxy
         async function fetchFeed() {
             videoFeed.innerHTML = '<p class="text-slate-400 text-sm italic col-span-3 py-12 text-center animate-pulse">Fetching latest channel updates...</p>';
-            currentVideos = [];
-
-            for (const channel of CHANNELS) {
+            
+            // Fire off all fetch requests simultaneously
+            const fetchPromises = CHANNELS.map(async (channel) => {
                 try {
                     const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
+                    // Switched to corsproxy.io for better speed/reliability
+                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
                     
                     const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error("Network response error");
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     
                     const text = await response.text();
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(text, "text/xml");
                     
                     const firstEntry = xmlDoc.querySelector("entry");
-                    
                     if (firstEntry) {
                         const videoId = firstEntry.querySelector("videoId")?.textContent;
                         const title = firstEntry.querySelector("title")?.textContent;
                         
-                        currentVideos.push({
+                        return {
                             channelName: channel.name,
                             videoId: videoId,
-                            title: title
-                        });
+                            title: title,
+                            error: false
+                        };
                     }
+                    throw new Error("No entries found in RSS feed");
                 } catch (error) {
                     console.error(`Failed to fetch channel: ${channel.name}`, error);
+                    // Return placeholder with error flag so the UI can log it cleanly
+                    return {
+                        channelName: channel.name,
+                        error: true
+                    };
                 }
-            }
-            renderFeed();
+            });
+
+            // Wait for all channels to finish processing concurrently
+            const results = await Promise.all(fetchPromises);
+            
+            // Keep track of valid video returns
+            currentVideos = results.filter(item => !item.error);
+            
+            renderFeed(results);
             checkAndLogDailyCompletion();
         }
 
         // Render videos and inline player frames to dashboard
-        function renderFeed() {
-            if (currentVideos.length === 0) {
-                videoFeed.innerHTML = '<p class="text-red-400 text-sm col-span-3 text-center py-6">Unable to load feed items. Try refreshing.</p>';
-                return;
-            }
-
+        function renderFeed(allResults) {
             videoFeed.innerHTML = "";
-            currentVideos.forEach(video => {
-                const isWatched = watchedVideos.includes(video.videoId);
-                
+            
+            allResults.forEach(item => {
                 const card = document.createElement("div");
+                
+                // Handle Error Card UI State
+                if (item.error) {
+                    card.className = "p-4 border border-red-900/50 bg-red-950/20 rounded-xl flex flex-col justify-between shadow-sm min-h-[250px]";
+                    card.innerHTML = `
+                        <div>
+                            <span class="text-[11px] font-bold tracking-wider uppercase text-red-400 block mb-1">${item.channelName}</span>
+                            <h3 class="font-medium text-sm text-slate-300 mt-2">Failed to load feed</h3>
+                            <p class="text-xs text-slate-500 mt-1">The CORS proxy timed out or rate-limited this request.</p>
+                        </div>
+                        <div class="text-xs text-slate-500 italic mt-auto pt-3 border-t border-slate-800">
+                            Try clicking Refresh Feed above.
+                        </div>
+                    `;
+                    videoFeed.appendChild(card);
+                    return;
+                }
+
+                // Handle Standard Video Card UI State
+                const isWatched = watchedVideos.includes(item.videoId);
                 card.className = `p-4 border rounded-xl flex flex-col justify-between transition shadow-md ${
                     isWatched ? 'bg-slate-900/40 border-slate-800 opacity-60' : 'bg-slate-800 border-slate-700 hover:border-slate-600'
                 }`;
 
                 card.innerHTML = `
                     <div>
-                        <span class="text-[11px] font-bold tracking-wider uppercase text-indigo-400 block mb-1">${video.channelName}</span>
-                        <h3 class="font-medium text-sm text-slate-100 line-clamp-1 mb-3" title="${video.title}">
-                            ${video.title}
+                        <span class="text-[11px] font-bold tracking-wider uppercase text-indigo-400 block mb-1">${item.channelName}</span>
+                        <h3 class="font-medium text-sm text-slate-100 line-clamp-1 mb-3" title="${item.title}">
+                            ${item.title}
                         </h3>
                         
                         <div class="aspect-video w-full mb-4 rounded-lg overflow-hidden bg-black shadow-inner">
                             <iframe 
                                 class="w-full h-full"
-                                src="https://www.youtube.com/embed/${video.videoId}" 
-                                title="${video.title}" 
+                                src="https://www.youtube.com/embed/${item.videoId}" 
+                                title="${item.title}" 
                                 frameborder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                                 allowfullscreen>
@@ -145,14 +173,14 @@
                         </span>
                         <button class="toggle-btn text-xs px-3 py-1.5 rounded font-medium cursor-pointer transition ${
                             isWatched ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                        }" data-id="${video.videoId}">
+                        }">
                             ${isWatched ? 'Reset' : 'Mark Done'}
                         </button>
                     </div>
                 `;
 
                 card.querySelector(".toggle-btn").addEventListener("click", () => {
-                    toggleWatchStatus(video.videoId);
+                    toggleWatchStatus(item.videoId);
                 });
 
                 videoFeed.appendChild(card);
@@ -167,13 +195,13 @@
             }
             localStorage.setItem(STORAGE_KEY_WATCHED, JSON.stringify(watchedVideos));
             
-            renderFeed();
-            checkAndLogDailyCompletion();
+            fetchFeed(); // Re-fetch or re-render keeping current structures intact
         }
 
-        // Automatic logging for history maps
         function checkAndLogDailyCompletion() {
             const today = new Date().toISOString().split('T')[0];
+            
+            // If any active channels completely failed to load, don't auto-penalize or auto-clear history
             if (currentVideos.length === 0) return;
 
             const allDoneToday = currentVideos.every(video => watchedVideos.includes(video.videoId));
@@ -188,7 +216,6 @@
             calculatePerformance();
         }
 
-        // --- PERFORMANCE RATIO ENGINE ---
         function calculatePerformance() {
             const now = new Date();
             const currentYear = now.getFullYear();
