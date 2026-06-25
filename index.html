@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Learning Habit Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <div class="max-w-6xl mx-auto p-6">
+        <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Daily Language Feed</h1>
+                <p class="text-slate-400 text-sm mt-1">Keep your daily translation streaks alive.</p>
+            </div>
+            
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 min-w-[240px] shadow-md">
+                <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Monthly Performance</div>
+                <div class="flex items-baseline gap-2 mt-1">
+                    <span id="perf-percentage" class="text-3xl font-extrabold text-indigo-400">0%</span>
+                    <span class="text-xs text-slate-500">of days completed</span>
+                </div>
+                <div class="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
+                    <div id="perf-bar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div id="perf-meta" class="text-[11px] text-slate-400 mt-2"></div>
+            </div>
+        </header>
+
+        <main>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-slate-200">Today's Lessons</h2>
+                <button id="refresh-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
+                    Refresh Feed
+                </button>
+            </div>
+
+            <div id="video-feed" class="grid gap-6 md:grid-cols-3">
+                <p class="text-slate-500 text-sm italic col-span-3 text-center py-12 animate-pulse">Loading latest videos...</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- CHANNELS CONFIGURATION ---
+        const CHANNELS = [
+            { name: "Daily Dose of Greek", id: "UCRSbS2XhqOhnSUzWfGHUkLg" },
+            { name: "Daily Dose of Hebrew", id: "UC0fRqEfY1ZaiWiJWTj7HQng" },
+            { name: "Daily Dose of Latin", id: "UCMldVrQ8rKkWyevvQonijoA" }
+        ];
+
+        // --- STORAGE KEYS ---
+        const STORAGE_KEY_WATCHED = "yt_tracker_watched_videos";
+        const STORAGE_KEY_HISTORY = "yt_tracker_daily_history";
+
+        // --- STATE MANAGEMENT ---
+        let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
+        let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
+        let currentVideos = [];
+
+        // --- DOM ELEMENTS ---
+        const videoFeed = document.getElementById("video-feed");
+        const perfPercentage = document.getElementById("perf-percentage");
+        const perfBar = document.getElementById("perf-bar");
+        const perfMeta = document.getElementById("perf-meta");
+        const refreshBtn = document.getElementById("refresh-btn");
+
+        // --- CORE FUNCTIONS ---
+
+        // Fetch latest video via a CORS proxy for each channel
+        async function fetchFeed() {
+            videoFeed.innerHTML = '<p class="text-slate-400 text-sm italic col-span-3 py-12 text-center animate-pulse">Fetching latest channel updates...</p>';
+            currentVideos = [];
+
+            for (const channel of CHANNELS) {
+                try {
+                    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
+                    
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error("Network response error");
+                    
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(text, "text/xml");
+                    
+                    const firstEntry = xmlDoc.querySelector("entry");
+                    
+                    if (firstEntry) {
+                        const videoId = firstEntry.querySelector("videoId")?.textContent;
+                        const title = firstEntry.querySelector("title")?.textContent;
+                        
+                        currentVideos.push({
+                            channelName: channel.name,
+                            videoId: videoId,
+                            title: title
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch channel: ${channel.name}`, error);
+                }
+            }
+            renderFeed();
+            checkAndLogDailyCompletion();
+        }
+
+        // Render videos and inline player frames to dashboard
+        function renderFeed() {
+            if (currentVideos.length === 0) {
+                videoFeed.innerHTML = '<p class="text-red-400 text-sm col-span-3 text-center py-6">Unable to load feed items. Try refreshing.</p>';
+                return;
+            }
+
+            videoFeed.innerHTML = "";
+            currentVideos.forEach(video => {
+                const isWatched = watchedVideos.includes(video.videoId);
+                
+                const card = document.createElement("div");
+                card.className = `p-4 border rounded-xl flex flex-col justify-between transition shadow-md ${
+                    isWatched ? 'bg-slate-900/40 border-slate-800 opacity-60' : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                }`;
+
+                card.innerHTML = `
+                    <div>
+                        <span class="text-[11px] font-bold tracking-wider uppercase text-indigo-400 block mb-1">${video.channelName}</span>
+                        <h3 class="font-medium text-sm text-slate-100 line-clamp-1 mb-3" title="${video.title}">
+                            ${video.title}
+                        </h3>
+                        
+                        <div class="aspect-video w-full mb-4 rounded-lg overflow-hidden bg-black shadow-inner">
+                            <iframe 
+                                class="w-full h-full"
+                                src="https://www.youtube.com/embed/${video.videoId}" 
+                                title="${video.title}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-700/50">
+                        <span class="text-xs ${isWatched ? 'text-emerald-400 font-medium' : 'text-slate-400'}">
+                            ${isWatched ? '✓ Completed' : 'Unfinished'}
+                        </span>
+                        <button class="toggle-btn text-xs px-3 py-1.5 rounded font-medium cursor-pointer transition ${
+                            isWatched ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                        }" data-id="${video.videoId}">
+                            ${isWatched ? 'Reset' : 'Mark Done'}
+                        </button>
+                    </div>
+                `;
+
+                card.querySelector(".toggle-btn").addEventListener("click", () => {
+                    toggleWatchStatus(video.videoId);
+                });
+
+                videoFeed.appendChild(card);
+            });
+        }
+
+        function toggleWatchStatus(id) {
+            if (watchedVideos.includes(id)) {
+                watchedVideos = watchedVideos.filter(vId => vId !== id);
+            } else {
+                watchedVideos.push(id);
+            }
+            localStorage.setItem(STORAGE_KEY_WATCHED, JSON.stringify(watchedVideos));
+            
+            renderFeed();
+            checkAndLogDailyCompletion();
+        }
+
+        // Automatic logging for history maps
+        function checkAndLogDailyCompletion() {
+            const today = new Date().toISOString().split('T')[0];
+            if (currentVideos.length === 0) return;
+
+            const allDoneToday = currentVideos.every(video => watchedVideos.includes(video.videoId));
+            
+            if (allDoneToday) {
+                dailyHistory[today] = true;
+            } else {
+                delete dailyHistory[today];
+            }
+            
+            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(dailyHistory));
+            calculatePerformance();
+        }
+
+        // --- PERFORMANCE RATIO ENGINE ---
+        function calculatePerformance() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            const currentDay = now.getDate();
+
+            let completedDaysThisMonth = 0;
+
+            for (let d = 1; d <= currentDay; d++) {
+                const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                if (dailyHistory[dateString] === true) {
+                    completedDaysThisMonth++;
+                }
+            }
+
+            const percentage = Math.round((completedDaysThisMonth / currentDay) * 100) || 0;
+
+            perfPercentage.textContent = `${percentage}%`;
+            perfBar.style.width = `${percentage}%`;
+            perfMeta.textContent = `${completedDaysThisMonth} of ${currentDay} days finalized this month.`;
+        }
+
+        // --- INITIALIZATION ---
+        refreshBtn.addEventListener("click", fetchFeed);
+        fetchFeed();
+    </script>
+</body>
+</html>
