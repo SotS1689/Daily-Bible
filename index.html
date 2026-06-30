@@ -30,9 +30,20 @@
 
     <div class="flex items-center justify-between mb-3 shrink-0">
         <h2 class="text-lg font-semibold text-slate-200">Today's Lessons</h2>
-        <button id="refresh-btn" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
-            Refresh Feed
-        </button>
+        
+        <div class="flex items-center gap-5">
+            <label class="inline-flex items-center cursor-pointer gap-2 select-none text-xs font-medium text-slate-300">
+                <span>Latin</span>
+                <div class="relative">
+                    <input type="checkbox" id="latin-toggle" class="sr-only peer">
+                    <div class="w-8 h-4 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+                </div>
+            </label>
+
+            <button id="refresh-btn" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
+                Refresh Feed
+            </button>
+        </div>
     </div>
 
     <main id="workspace" class="flex-1 min-h-0 w-full flex flex-col">
@@ -51,9 +62,13 @@
 
         const STORAGE_KEY_WATCHED = "yt_tracker_watched_videos";
         const STORAGE_KEY_HISTORY = "yt_tracker_daily_history";
+        const STORAGE_KEY_LATIN = "yt_tracker_show_latin";
 
         let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
         let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
+        
+        // Defaults to true (ON) if no local storage preference exists yet
+        let showLatin = localStorage.getItem(STORAGE_KEY_LATIN) !== "false";
         let currentVideos = [];
         let activeVideoId = null;
 
@@ -62,6 +77,10 @@
         const perfBar = document.getElementById("perf-bar");
         const perfMeta = document.getElementById("perf-meta");
         const refreshBtn = document.getElementById("refresh-btn");
+        const latinToggle = document.getElementById("latin-toggle");
+
+        // Sync toggle UI state with stored boolean state
+        latinToggle.checked = showLatin;
 
         async function fetchFeed() {
             videoFeed.className = "w-full h-full flex items-center justify-center";
@@ -108,16 +127,24 @@
 
         function renderFeed(allResults) {
             videoFeed.innerHTML = "";
-            const hasActiveVideo = activeVideoId && allResults.some(item => !item.error && item.videoId === activeVideoId);
+            
+            // Filter logic pipeline: Hide Latin card completely if the toggle is false (OFF)
+            const filteredResults = showLatin 
+                ? allResults
+                : allResults.filter(item => item.channelName !== "Daily Dose of Latin");
+
+            const hasActiveVideo = activeVideoId && filteredResults.some(item => !item.error && item.videoId === activeVideoId);
             
             if (!hasActiveVideo) {
-                // STATE 1: Standard 3-Column Grid stretched to exactly match viewport bounds
-                videoFeed.className = "grid gap-4 md:grid-cols-3 w-full h-full min-h-0 items-stretch";
-                allResults.forEach(item => {
+                // STATE 1: Standard Horizontal Viewport Grid
+                const gridColsClass = filteredResults.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3';
+                videoFeed.className = `grid gap-4 w-full h-full min-h-0 items-stretch ${gridColsClass}`;
+                
+                filteredResults.forEach(item => {
                     videoFeed.appendChild(createCardElement(item, false, false));
                 });
             } else {
-                // STATE 2: Theater Split Row with vertical sidebar stacking
+                // STATE 2: Expanded Theater Mode Split
                 videoFeed.className = "flex flex-col lg:flex-row gap-4 w-full h-full min-h-0 items-stretch";
                 
                 const mainStage = document.createElement("div");
@@ -126,7 +153,7 @@
                 const sidebar = document.createElement("div");
                 sidebar.className = "w-full lg:w-1/4 h-full flex flex-col gap-3 min-h-0";
                 
-                allResults.forEach(item => {
+                filteredResults.forEach(item => {
                     if (!item.error && item.videoId === activeVideoId) {
                         mainStage.appendChild(createCardElement(item, true, false));
                     } else {
@@ -150,7 +177,6 @@
 
             const isWatched = watchedVideos.includes(item.videoId);
             
-            // Sidebar entries use flex-1 min-h-0 to share vertical space equally without overflowing
             card.className = `p-3 border rounded-xl flex flex-col justify-between transition shadow-md w-full min-h-0 ${
                 isActive ? 'bg-slate-800 border-indigo-500 ring-1 ring-indigo-500/20 h-full' : 
                 isSidebar ? 'bg-slate-800/90 border-slate-700 hover:border-slate-600 flex-1' :
@@ -232,11 +258,38 @@
             checkAndLogDailyCompletion();
         };
 
+        // --- TOGGLE EVENT HANDLER ---
+        latinToggle.addEventListener("change", (e) => {
+            showLatin = e.target.checked;
+            localStorage.setItem(STORAGE_KEY_LATIN, showLatin);
+            
+            // Layout Safety Guard: If Latin is active inside Theater mode when turned OFF, minimize first
+            if (!showLatin && window.cachedResults) {
+                const latinItem = window.cachedResults.find(i => i.channelName === "Daily Dose of Latin");
+                if (latinItem && activeVideoId === latinItem.videoId) {
+                    activeVideoId = null;
+                }
+            }
+            
+            if (window.cachedResults) {
+                renderFeed(window.cachedResults);
+                checkAndLogDailyCompletion();
+            }
+        });
+
+        // --- SEAMLESS COMPLETION ENGINE FILTER ---
         function checkAndLogDailyCompletion() {
             const today = new Date().toISOString().split('T')[0];
             if (currentVideos.length === 0) return;
 
-            const allDoneToday = currentVideos.every(video => watchedVideos.includes(video.videoId));
+            // Dynamically limits target requirements based on toggle position
+            const activeTargetVideos = showLatin
+                ? currentVideos
+                : currentVideos.filter(v => v.channelName !== "Daily Dose of Latin");
+
+            if (activeTargetVideos.length === 0) return;
+
+            const allDoneToday = activeTargetVideos.every(video => watchedVideos.includes(video.videoId));
             if (allDoneToday) {
                 dailyHistory[today] = true;
             } else {
