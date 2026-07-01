@@ -51,13 +51,23 @@
         <h2 class="text-lg font-semibold text-slate-200">Today's Lessons</h2>
         
         <div class="flex items-center gap-5">
-            <label class="inline-flex items-center cursor-pointer gap-2 select-none text-xs font-medium text-slate-300">
-                <span>Latin</span>
-                <div class="relative">
-                    <input type="checkbox" id="latin-toggle" class="sr-only peer">
-                    <div class="w-8 h-4 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
-                </div>
-            </label>
+            <div class="flex items-center gap-4 border-r border-slate-800 pr-4">
+                <label class="inline-flex items-center cursor-pointer gap-2 select-none text-xs font-medium text-slate-300">
+                    <span>Latin</span>
+                    <div class="relative">
+                        <input type="checkbox" id="latin-toggle" class="sr-only peer">
+                        <div class="w-8 h-4 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+                    </div>
+                </label>
+
+                <label class="inline-flex items-center cursor-pointer gap-2 select-none text-xs font-medium text-slate-300">
+                    <span>Septuagint</span>
+                    <div class="relative">
+                        <input type="checkbox" id="septuagint-toggle" class="sr-only peer">
+                        <div class="w-8 h-4 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+                    </div>
+                </label>
+            </div>
 
             <button id="refresh-btn" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition cursor-pointer">
                 Refresh Feed
@@ -76,18 +86,22 @@
         const CHANNELS = [
             { name: "Daily Dose of Greek", id: "UCRSbS2XhqOhnSUzWfGHUkLg" },
             { name: "Daily Dose of Hebrew", id: "UC0fRqEfY1ZaiWiJWTj7HQng" },
-            { name: "Daily Dose of Latin", id: "UCMldVrQ8rKkWyevvQonijoA" }
+            { name: "Daily Dose of Latin", id: "UCMldVrQ8rKkWyevvQonijoA" },
+            { name: "Daily Dose of Septuagint", id: "F3qCDVSGyWDdNZzpOGYfbw" }
         ];
 
         const STORAGE_KEY_WATCHED = "yt_tracker_watched_videos";
         const STORAGE_KEY_HISTORY = "yt_tracker_daily_history";
         const STORAGE_KEY_LATIN = "yt_tracker_show_latin";
+        const STORAGE_KEY_SEPTUAGINT = "yt_tracker_show_septuagint";
 
         let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
         let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
         
-        // Defaults to true (ON) if no local storage preference exists yet
+        // Settings default to true (ON) if preference configurations are empty
         let showLatin = localStorage.getItem(STORAGE_KEY_LATIN) !== "false";
+        let showSeptuagint = localStorage.getItem(STORAGE_KEY_SEPTUAGINT) !== "false";
+        
         let currentVideos = [];
         let activeVideoId = null;
 
@@ -97,9 +111,11 @@
         const perfMeta = document.getElementById("perf-meta");
         const refreshBtn = document.getElementById("refresh-btn");
         const latinToggle = document.getElementById("latin-toggle");
+        const septuagintToggle = document.getElementById("septuagint-toggle");
 
-        // Sync toggle UI state with stored boolean state
+        // Sync initial UI toggle element states
         latinToggle.checked = showLatin;
+        septuagintToggle.checked = showSeptuagint;
 
         async function fetchFeed() {
             videoFeed.className = "w-full h-full flex items-center justify-center";
@@ -147,23 +163,28 @@
         function renderFeed(allResults) {
             videoFeed.innerHTML = "";
             
-            // Filter logic pipeline: Hide Latin card completely if the toggle is false (OFF)
-            const filteredResults = showLatin 
-                ? allResults
-                : allResults.filter(item => item.channelName !== "Daily Dose of Latin");
+            // Core Conditional Layout Filtering Pipeline
+            const filteredResults = allResults.filter(item => {
+                if (item.channelName === "Daily Dose of Latin" && !showLatin) return false;
+                if (item.channelName === "Daily Dose of Septuagint" && !showSeptuagint) return false;
+                return true;
+            });
 
             const hasActiveVideo = activeVideoId && filteredResults.some(item => !item.error && item.videoId === activeVideoId);
             
             if (!hasActiveVideo) {
-                // STATE 1: Standard Horizontal Viewport Grid
-                const gridColsClass = filteredResults.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3';
+                // STATE 1: Standard Horizontal Adaptive Grid Layout
+                let gridColsClass = 'md:grid-cols-4';
+                if (filteredResults.length === 3) gridColsClass = 'md:grid-cols-3';
+                if (filteredResults.length === 2) gridColsClass = 'md:grid-cols-2';
+                
                 videoFeed.className = `grid gap-4 w-full h-full min-h-0 items-stretch ${gridColsClass}`;
                 
                 filteredResults.forEach(item => {
                     videoFeed.appendChild(createCardElement(item, false, false));
                 });
             } else {
-                // STATE 2: Expanded Theater Mode Split
+                // STATE 2: Expanded Theater Split Layout
                 videoFeed.className = "flex flex-col lg:flex-row gap-4 w-full h-full min-h-0 items-stretch";
                 
                 const mainStage = document.createElement("div");
@@ -190,7 +211,7 @@
             
             if (item.error) {
                 card.className = `p-3 border border-red-900/40 bg-red-950/10 rounded-xl flex flex-col justify-center items-center shadow-sm h-full w-full ${isSidebar ? 'flex-1 min-h-0' : ''}`;
-                card.innerHTML = `<span class="text-[10px] font-bold uppercase text-red-400">${item.channelName}</span><p class="text-xs text-slate-400 mt-1">Failed to load</p>`;
+                card.innerHTML = `<span class="text-[10px] font-bold uppercase text-red-400">${item.channelName}</span><p class="text-xs text-slate-400 mt-1">Failed to load</p>';
                 return card;
             }
 
@@ -277,34 +298,43 @@
             checkAndLogDailyCompletion();
         };
 
-        // --- TOGGLE EVENT HANDLER ---
+        // --- LATIN TOGGLE ACTION ---
         latinToggle.addEventListener("change", (e) => {
             showLatin = e.target.checked;
             localStorage.setItem(STORAGE_KEY_LATIN, showLatin);
-            
-            // Layout Safety Guard: If Latin is active inside Theater mode when turned OFF, minimize first
-            if (!showLatin && window.cachedResults) {
-                const latinItem = window.cachedResults.find(i => i.channelName === "Daily Dose of Latin");
-                if (latinItem && activeVideoId === latinItem.videoId) {
+            handleToggleSafetyGuard("Daily Dose of Latin", showLatin);
+        });
+
+        // --- SEPTUAGINT TOGGLE ACTION ---
+        septuagintToggle.addEventListener("change", (e) => {
+            showSeptuagint = e.target.checked;
+            localStorage.setItem(STORAGE_KEY_SEPTUAGINT, showSeptuagint);
+            handleToggleSafetyGuard("Daily Dose of Septuagint", showSeptuagint);
+        });
+
+        function handleToggleSafetyGuard(channelName, isVisible) {
+            if (!isVisible && window.cachedResults) {
+                const targetedItem = window.cachedResults.find(i => i.channelName === channelName);
+                if (targetedItem && activeVideoId === targetedItem.videoId) {
                     activeVideoId = null;
                 }
             }
-            
             if (window.cachedResults) {
                 renderFeed(window.cachedResults);
                 checkAndLogDailyCompletion();
             }
-        });
+        }
 
-        // --- SEAMLESS COMPLETION ENGINE FILTER ---
+        // --- DYNAMICALLY ADAPTING COMPLETION TRACKING ---
         function checkAndLogDailyCompletion() {
             const today = new Date().toISOString().split('T')[0];
             if (currentVideos.length === 0) return;
 
-            // Dynamically limits target requirements based on toggle position
-            const activeTargetVideos = showLatin
-                ? currentVideos
-                : currentVideos.filter(v => v.channelName !== "Daily Dose of Latin");
+            const activeTargetVideos = currentVideos.filter(v => {
+                if (v.channelName === "Daily Dose of Latin" && !showLatin) return false;
+                if (v.channelName === "Daily Dose of Septuagint" && !showSeptuagint) return false;
+                return true;
+            });
 
             if (activeTargetVideos.length === 0) return;
 
