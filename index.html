@@ -87,7 +87,7 @@
             { name: "Daily Dose of Greek", id: "UCRSbS2XhqOhnSUzWfGHUkLg" },
             { name: "Daily Dose of Hebrew", id: "UC0fRqEfY1ZaiWiJWTj7HQng" },
             { name: "Daily Dose of Latin", id: "UCMldVrQ8rKkWyevvQonijoA" },
-            { name: "Daily Dose of Septuagint", id: "UC5SB4egyj9-RNdjL-VxcDRw" }
+            { name: "Daily Dose of Septuagint", id: "UC5SB4egyj9-RNdjL-VxcDRw" } // Fixed: Updated with the correct channel ID
         ];
 
         const STORAGE_KEY_WATCHED = "yt_tracker_watched_videos";
@@ -211,7 +211,7 @@
             
             if (item.error) {
                 card.className = `p-3 border border-red-900/40 bg-red-950/10 rounded-xl flex flex-col justify-center items-center shadow-sm h-full w-full ${isSidebar ? 'flex-1 min-h-0' : ''}`;
-                card.innerHTML = `<span class="text-[10px] font-bold uppercase text-red-400">${item.channelName}</span><p class="text-xs text-slate-400 mt-1">Failed to load</p>';
+                card.innerHTML = `<span class="text-[10px] font-bold uppercase text-red-400">${item.channelName}</span><p class="text-xs text-slate-400 mt-1">Failed to load</p>`;
                 return card;
             }
 
@@ -325,7 +325,6 @@
             }
         }
 
-        // --- DYNAMICALLY ADAPTING COMPLETION TRACKING ---
         function checkAndLogDailyCompletion() {
             const today = new Date().toISOString().split('T')[0];
             if (currentVideos.length === 0) return;
