@@ -118,48 +118,72 @@
         latinToggle.checked = showLatin;
         septuagintToggle.checked = showSeptuagint;
 
-        async function fetchFeed() {
-            videoFeed.className = "w-full h-full flex items-center justify-center";
-            videoFeed.innerHTML = '<p class="text-slate-400 text-sm italic animate-pulse">Fetching latest channel updates...</p>';
-            
-            const fetchPromises = CHANNELS.map(async (channel) => {
-                try {
-                    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
-                    
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    
-                    const text = await response.text();
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(text, "text/xml");
-                    
-                    const firstEntry = xmlDoc.querySelector("entry");
-                    if (firstEntry) {
-                        const videoId = firstEntry.querySelector("videoId")?.textContent;
-                        const title = firstEntry.querySelector("title")?.textContent;
-                        
-                        return {
-                            channelName: channel.name,
-                            videoId: videoId,
-                            title: title,
-                            error: false
-                        };
-                    }
-                    throw new Error("No entries found in RSS feed");
-                } catch (error) {
-                    console.error(`Failed to fetch channel: ${channel.name}`, error);
-                    return { channelName: channel.name, error: true };
-                }
-            });
+// Helper: Sequentially tries multiple CORS proxies until one succeeds
+async function fetchWithFallback(targetUrl) {
+    const proxies = [
+        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+    ];
 
-            const results = await Promise.all(fetchPromises);
-            window.cachedResults = results;
-            currentVideos = results.filter(item => !item.error);
+    let lastError = null;
+
+    for (const getProxyUrl of proxies) {
+        try {
+            const proxyUrl = getProxyUrl(targetUrl);
+            const response = await fetch(proxyUrl);
             
-            renderFeed(results);
-            checkAndLogDailyCompletion();
+            if (response.ok) {
+                return await response.text();
+            }
+        } catch (e) {
+            lastError = e;
+            console.warn(`Proxy failed, attempting fallback...`, e);
         }
+    }
+
+    throw new Error(`All CORS proxies failed to fetch feed. ${lastError ? lastError.message : ''}`);
+}
+
+// Main fetch function replacing lines ~130–156 in your script
+async function fetchFeed(channel) {
+    // Accepts either a channel object ({ name, id }) or direct RSS URL string
+    const targetUrl = typeof channel === 'object' && channel.id
+        ? `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`
+        : (channel.url || channel);
+
+    const channelName = typeof channel === 'object' ? channel.name : 'YouTube Feed';
+
+    try {
+        // 1. Fetch XML string using the proxy fallback helper
+        const xmlText = await fetchWithFallback(targetUrl);
+
+        // 2. Parse XML into DOM object
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+        if (xmlDoc.querySelector("parsererror")) {
+            throw new Error("Invalid XML structure returned from proxy.");
+        }
+
+        // 3. Extract video entries
+        const entries = Array.from(xmlDoc.querySelectorAll("entry")).map(entry => ({
+            id: entry.querySelector("videoId")?.textContent || 
+                entry.querySelector("yt\\:videoId")?.textContent || '',
+            title: entry.querySelector("title")?.textContent || 'Untitled Video',
+            published: entry.querySelector("published")?.textContent || ''
+        }));
+
+        return {
+            name: channelName,
+            entries: entries
+        };
+
+    } catch (err) {
+        console.error(`Failed to fetch channel: ${channelName}`, err);
+        throw err;
+    }
+}
 
         function renderFeed(allResults) {
             videoFeed.innerHTML = "";
