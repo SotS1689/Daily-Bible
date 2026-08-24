@@ -27,7 +27,7 @@
             
             <a href="https://buymeacoffee.com/reformedretrieval" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition shadow-md text-slate-300 hover:text-slate-100 shrink-0">
                 <svg class="w-3.5 h-3.5 text-indigo-400 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 21h18a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zM20.242 11.022a1 1 0 0 0-.242-.688 2.99 2.99 0 0 0-2-.734H16V6a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2.022h2a3 3 0 0 0 3-3V11.02a1 1 0 0 0-.758-.998zM14 16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 v10zm4-4.022V11.6h-2v-2h2a1 1 0 0 1 1 1v1.378a1 1 0 0 1-1 1z"/>
+                    <path d="M2 21h18a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zM20.242 11.022a1 1 0 0 0-.242-.688 2.99 2.99 0 0 0-2-.734H16V6a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2.022h2a3 3 0 0 0 3-3V11.02a1 1 0 0 0-.758-.998zM14 16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v10zm4-4.022V11.6h-2v-2h2a1 1 0 0 1 1 1v1.378a1 1 0 0 1-1 1z"/>
                 </svg>
                 <span>Support</span>
             </a>
@@ -123,79 +123,39 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Helper: Sequentially tries multiple CORS proxies until one succeeds
-        async function fetchWithFallback(targetUrl) {
-            const proxies = [
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
-            ];
-
-            let lastError = null;
-
-            for (const getProxyUrl of proxies) {
-                try {
-                    const proxyUrl = getProxyUrl(targetUrl);
-                    const response = await fetch(proxyUrl);
-                    
-                    if (response.ok) {
-                        return await response.text();
-                    }
-                } catch (e) {
-                    lastError = e;
-                    console.warn(`Proxy failed, attempting fallback...`, e);
-                }
-            }
-
-            throw new Error(`All CORS proxies failed to fetch feed. ${lastError ? lastError.message : ''}`);
-        }
-
+        // Refactored to use rss2json API (Bypasses CORS and manual XML parsing entirely)
         async function fetchFeed(channel) {
-            if (!channel) {
-                throw new Error("fetchFeed was called with an undefined or null channel object.");
+            if (!channel || !channel.id) {
+                throw new Error("Invalid channel object provided.");
             }
 
-            let targetUrl = "";
-            let channelName = "YouTube Feed";
+            const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
-            if (typeof channel === "string") {
-                targetUrl = channel;
-            } else if (typeof channel === "object") {
-                channelName = channel.name || "YouTube Feed";
-                if (channel.id) {
-                    targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-                } else if (channel.channelId) {
-                    targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.channelId}`;
-                } else if (channel.url) {
-                    targetUrl = channel.url;
-                }
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
             }
 
-            if (!targetUrl) {
-                throw new Error(`Could not construct a valid feed URL for channel: ${JSON.stringify(channel)}`);
+            const data = await response.json();
+
+            if (data.status !== "ok") {
+                throw new Error(data.message || "Failed to fetch RSS data");
             }
 
-            const xmlText = await fetchWithFallback(targetUrl);
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
-            if (xmlDoc.querySelector("parsererror")) {
-                throw new Error("Invalid XML structure returned from proxy.");
-            }
-
-            const entries = Array.from(xmlDoc.querySelectorAll("entry")).map(entry => {
-                const idNode = entry.querySelector("videoId") || 
-                               entry.getElementsByTagName("yt:videoId")[0] ||
-                               entry.getElementsByTagName("videoId")[0];
+            const entries = data.items.map(item => {
+                // rss2json returns YouTube GUIDs as "yt:video:ID"
+                const videoId = item.guid.replace('yt:video:', '');
                 return {
-                    id: idNode ? idNode.textContent.trim() : '',
-                    title: entry.querySelector("title")?.textContent || 'Untitled Video',
-                    published: entry.querySelector("published")?.textContent || ''
+                    id: videoId,
+                    title: item.title,
+                    published: item.pubDate
                 };
             });
 
             return {
-                name: channelName,
+                name: channel.name,
                 entries: entries
             };
         }
