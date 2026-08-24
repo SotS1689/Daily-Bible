@@ -147,18 +147,36 @@ async function fetchWithFallback(targetUrl) {
 
 // Main fetch function replacing lines ~130–156 in your script
 async function fetchFeed(channel) {
-    // Accepts either a channel object ({ name, id }) or direct RSS URL string
-    const targetUrl = typeof channel === 'object' && channel.id
-        ? `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`
-        : (channel.url || channel);
+    if (!channel) {
+        throw new Error("fetchFeed was called with an undefined or null channel object.");
+    }
 
-    const channelName = typeof channel === 'object' ? channel.name : 'YouTube Feed';
+    let targetUrl = "";
+    let channelName = "YouTube Feed";
+
+    // 1. Extract channel name and construct target RSS URL safely
+    if (typeof channel === "string") {
+        targetUrl = channel;
+    } else if (typeof channel === "object") {
+        channelName = channel.name || "YouTube Feed";
+        if (channel.id) {
+            targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+        } else if (channel.channelId) {
+            targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.channelId}`;
+        } else if (channel.url) {
+            targetUrl = channel.url;
+        }
+    }
+
+    if (!targetUrl) {
+        throw new Error(`Could not construct a valid feed URL for channel: ${JSON.stringify(channel)}`);
+    }
 
     try {
-        // 1. Fetch XML string using the proxy fallback helper
+        // 2. Fetch XML string using the proxy fallback helper
         const xmlText = await fetchWithFallback(targetUrl);
 
-        // 2. Parse XML into DOM object
+        // 3. Parse XML into DOM object
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
@@ -166,7 +184,7 @@ async function fetchFeed(channel) {
             throw new Error("Invalid XML structure returned from proxy.");
         }
 
-        // 3. Extract video entries
+        // 4. Extract video entries
         const entries = Array.from(xmlDoc.querySelectorAll("entry")).map(entry => ({
             id: entry.querySelector("videoId")?.textContent || 
                 entry.querySelector("yt\\:videoId")?.textContent || '',
