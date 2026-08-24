@@ -27,7 +27,7 @@
             
             <a href="https://buymeacoffee.com/reformedretrieval" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg border border-slate-700 transition shadow-md text-slate-300 hover:text-slate-100 shrink-0">
                 <svg class="w-3.5 h-3.5 text-indigo-400 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 21h18a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zM20.242 11.022a1 1 0 0 0-.242-.688 2.99 2.99 0 0 0-2-.734H16V6a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2.022h2a3 3 0 0 0 3-3V11.02a1 1 0 0 0-.758-.998zM14 16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v10zm4-4.022V11.6h-2v-2h2a1 1 0 0 1 1 1v1.378a1 1 0 0 1-1 1z"/>
+                    <path d="M2 21h18a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zM20.242 11.022a1 1 0 0 0-.242-.688 2.99 2.99 0 0 0-2-.734H16V6a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2.022h2a3 3 0 0 0 3-3V11.02a1 1 0 0 0-.758-.998zM14 16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 v10zm4-4.022V11.6h-2v-2h2a1 1 0 0 1 1 1v1.378a1 1 0 0 1-1 1z"/>
                 </svg>
                 <span>Support</span>
             </a>
@@ -88,7 +88,7 @@
             { name: "Daily Dose of Greek", id: "UCRSbS2XhqOhnSUzWfGHUkLg" },
             { name: "Daily Dose of Hebrew", id: "UC0fRqEfY1ZaiWiJWTj7HQng" },
             { name: "Daily Dose of Latin", id: "UCMldVrQ8rKkWyevvQonijoA" },
-            { name: "Daily Dose of Septuagint", id: "UC5SB4egyj9-RNdjL-VxcDRw" } // Fixed: Updated with the correct channel ID
+            { name: "Daily Dose of Septuagint", id: "UC5SB4egyj9-RNdjL-VxcDRw" }
         ];
 
         const STORAGE_KEY_WATCHED = "yt_tracker_watched_videos";
@@ -99,7 +99,6 @@
         let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
         let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
         
-        // Settings default to true (ON) if preference configurations are empty
         let showLatin = localStorage.getItem(STORAGE_KEY_LATIN) !== "false";
         let showSeptuagint = localStorage.getItem(STORAGE_KEY_SEPTUAGINT) !== "false";
         
@@ -114,99 +113,130 @@
         const latinToggle = document.getElementById("latin-toggle");
         const septuagintToggle = document.getElementById("septuagint-toggle");
 
-        // Sync initial UI toggle element states
         latinToggle.checked = showLatin;
         septuagintToggle.checked = showSeptuagint;
 
-// Helper: Sequentially tries multiple CORS proxies until one succeeds
-async function fetchWithFallback(targetUrl) {
-    const proxies = [
-        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
-    ];
+        function getLocalDateString(d = new Date()) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
-    let lastError = null;
+        // Helper: Sequentially tries multiple CORS proxies until one succeeds
+        async function fetchWithFallback(targetUrl) {
+            const proxies = [
+                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+            ];
 
-    for (const getProxyUrl of proxies) {
-        try {
-            const proxyUrl = getProxyUrl(targetUrl);
-            const response = await fetch(proxyUrl);
-            
-            if (response.ok) {
-                return await response.text();
+            let lastError = null;
+
+            for (const getProxyUrl of proxies) {
+                try {
+                    const proxyUrl = getProxyUrl(targetUrl);
+                    const response = await fetch(proxyUrl);
+                    
+                    if (response.ok) {
+                        return await response.text();
+                    }
+                } catch (e) {
+                    lastError = e;
+                    console.warn(`Proxy failed, attempting fallback...`, e);
+                }
             }
-        } catch (e) {
-            lastError = e;
-            console.warn(`Proxy failed, attempting fallback...`, e);
-        }
-    }
 
-    throw new Error(`All CORS proxies failed to fetch feed. ${lastError ? lastError.message : ''}`);
-}
-
-// Main fetch function replacing lines ~130–156 in your script
-async function fetchFeed(channel) {
-    if (!channel) {
-        throw new Error("fetchFeed was called with an undefined or null channel object.");
-    }
-
-    let targetUrl = "";
-    let channelName = "YouTube Feed";
-
-    // 1. Extract channel name and construct target RSS URL safely
-    if (typeof channel === "string") {
-        targetUrl = channel;
-    } else if (typeof channel === "object") {
-        channelName = channel.name || "YouTube Feed";
-        if (channel.id) {
-            targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-        } else if (channel.channelId) {
-            targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.channelId}`;
-        } else if (channel.url) {
-            targetUrl = channel.url;
-        }
-    }
-
-    if (!targetUrl) {
-        throw new Error(`Could not construct a valid feed URL for channel: ${JSON.stringify(channel)}`);
-    }
-
-    try {
-        // 2. Fetch XML string using the proxy fallback helper
-        const xmlText = await fetchWithFallback(targetUrl);
-
-        // 3. Parse XML into DOM object
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
-        if (xmlDoc.querySelector("parsererror")) {
-            throw new Error("Invalid XML structure returned from proxy.");
+            throw new Error(`All CORS proxies failed to fetch feed. ${lastError ? lastError.message : ''}`);
         }
 
-        // 4. Extract video entries
-        const entries = Array.from(xmlDoc.querySelectorAll("entry")).map(entry => ({
-            id: entry.querySelector("videoId")?.textContent || 
-                entry.querySelector("yt\\:videoId")?.textContent || '',
-            title: entry.querySelector("title")?.textContent || 'Untitled Video',
-            published: entry.querySelector("published")?.textContent || ''
-        }));
+        async function fetchFeed(channel) {
+            if (!channel) {
+                throw new Error("fetchFeed was called with an undefined or null channel object.");
+            }
 
-        return {
-            name: channelName,
-            entries: entries
-        };
+            let targetUrl = "";
+            let channelName = "YouTube Feed";
 
-    } catch (err) {
-        console.error(`Failed to fetch channel: ${channelName}`, err);
-        throw err;
-    }
-}
+            if (typeof channel === "string") {
+                targetUrl = channel;
+            } else if (typeof channel === "object") {
+                channelName = channel.name || "YouTube Feed";
+                if (channel.id) {
+                    targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+                } else if (channel.channelId) {
+                    targetUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.channelId}`;
+                } else if (channel.url) {
+                    targetUrl = channel.url;
+                }
+            }
+
+            if (!targetUrl) {
+                throw new Error(`Could not construct a valid feed URL for channel: ${JSON.stringify(channel)}`);
+            }
+
+            const xmlText = await fetchWithFallback(targetUrl);
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+            if (xmlDoc.querySelector("parsererror")) {
+                throw new Error("Invalid XML structure returned from proxy.");
+            }
+
+            const entries = Array.from(xmlDoc.querySelectorAll("entry")).map(entry => {
+                const idNode = entry.querySelector("videoId") || 
+                               entry.getElementsByTagName("yt:videoId")[0] ||
+                               entry.getElementsByTagName("videoId")[0];
+                return {
+                    id: idNode ? idNode.textContent.trim() : '',
+                    title: entry.querySelector("title")?.textContent || 'Untitled Video',
+                    published: entry.querySelector("published")?.textContent || ''
+                };
+            });
+
+            return {
+                name: channelName,
+                entries: entries
+            };
+        }
+
+        // Orchestrator function to load all channels concurrently and structure UI state
+        async function loadAllFeeds() {
+            videoFeed.innerHTML = '<p class="text-slate-500 text-sm italic animate-pulse">Loading latest videos...</p>';
+            
+            const results = await Promise.all(
+                CHANNELS.map(async (channel) => {
+                    try {
+                        const feedData = await fetchFeed(channel);
+                        const latestVideo = feedData.entries[0];
+                        if (!latestVideo || !latestVideo.id) {
+                            throw new Error("No videos found in feed");
+                        }
+                        return {
+                            channelName: channel.name,
+                            videoId: latestVideo.id,
+                            title: latestVideo.title,
+                            error: false
+                        };
+                    } catch (err) {
+                        console.error(`Error loading channel ${channel.name}:`, err);
+                        return {
+                            channelName: channel.name,
+                            error: true
+                        };
+                    }
+                })
+            );
+
+            window.cachedResults = results;
+            currentVideos = results.filter(item => !item.error);
+            renderFeed(results);
+            checkAndLogDailyCompletion();
+        }
 
         function renderFeed(allResults) {
             videoFeed.innerHTML = "";
             
-            // Core Conditional Layout Filtering Pipeline
             const filteredResults = allResults.filter(item => {
                 if (item.channelName === "Daily Dose of Latin" && !showLatin) return false;
                 if (item.channelName === "Daily Dose of Septuagint" && !showSeptuagint) return false;
@@ -216,7 +246,6 @@ async function fetchFeed(channel) {
             const hasActiveVideo = activeVideoId && filteredResults.some(item => !item.error && item.videoId === activeVideoId);
             
             if (!hasActiveVideo) {
-                // STATE 1: Standard Horizontal Adaptive Grid Layout
                 let gridColsClass = 'md:grid-cols-4';
                 if (filteredResults.length === 3) gridColsClass = 'md:grid-cols-3';
                 if (filteredResults.length === 2) gridColsClass = 'md:grid-cols-2';
@@ -227,7 +256,6 @@ async function fetchFeed(channel) {
                     videoFeed.appendChild(createCardElement(item, false, false));
                 });
             } else {
-                // STATE 2: Expanded Theater Split Layout
                 videoFeed.className = "flex flex-col lg:flex-row gap-4 w-full h-full min-h-0 items-stretch";
                 
                 const mainStage = document.createElement("div");
@@ -341,14 +369,12 @@ async function fetchFeed(channel) {
             checkAndLogDailyCompletion();
         };
 
-        // --- LATIN TOGGLE ACTION ---
         latinToggle.addEventListener("change", (e) => {
             showLatin = e.target.checked;
             localStorage.setItem(STORAGE_KEY_LATIN, showLatin);
             handleToggleSafetyGuard("Daily Dose of Latin", showLatin);
         });
 
-        // --- SEPTUAGINT TOGGLE ACTION ---
         septuagintToggle.addEventListener("change", (e) => {
             showSeptuagint = e.target.checked;
             localStorage.setItem(STORAGE_KEY_SEPTUAGINT, showSeptuagint);
@@ -369,7 +395,7 @@ async function fetchFeed(channel) {
         }
 
         function checkAndLogDailyCompletion() {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             if (currentVideos.length === 0) return;
 
             const activeTargetVideos = currentVideos.filter(v => {
@@ -411,8 +437,8 @@ async function fetchFeed(channel) {
             perfMeta.textContent = `${completedDaysThisMonth} of ${currentDay} days`;
         }
 
-        refreshBtn.addEventListener("click", fetchFeed);
-        fetchFeed();
+        refreshBtn.addEventListener("click", loadAllFeeds);
+        loadAllFeeds();
     </script>
 </body>
 </html>
