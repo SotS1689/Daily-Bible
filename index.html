@@ -95,9 +95,11 @@
         const STORAGE_KEY_HISTORY = "yt_tracker_daily_history";
         const STORAGE_KEY_LATIN = "yt_tracker_show_latin";
         const STORAGE_KEY_SEPTUAGINT = "yt_tracker_show_septuagint";
+        const CACHE_KEY_FEEDS = "yt_tracker_feed_cache"; // NEW: Network cache
 
         let watchedVideos = JSON.parse(localStorage.getItem(STORAGE_KEY_WATCHED)) || [];
         let dailyHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || {}; 
+        let feedCache = JSON.parse(localStorage.getItem(CACHE_KEY_FEEDS)) || {};
         
         let showLatin = localStorage.getItem(STORAGE_KEY_LATIN) !== "false";
         let showSeptuagint = localStorage.getItem(STORAGE_KEY_SEPTUAGINT) !== "false";
@@ -123,85 +125,112 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Native RSS fetcher with fallback proxies and native DOMParser
-        async function fetchFeed(channel) {
-            if (!channel || !channel.id) {
-                throw new Error("Invalid channel object provided.");
+        // Waterfall fetch logic with extreme resilience and caching
+        async function fetchFeed(channel, forceRefresh = false) {
+            const cacheKey = `feed_${channel.id}`;
+            const cached = feedCache[cacheKey];
+            const now = Date.now();
+            const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 Hours
+
+            // 1. Check local cache (Massively reduces proxy load)
+            if (!forceRefresh && cached && (now - cached.timestamp < CACHE_DURATION)) {
+                return cached.data;
             }
 
             const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
             
-            // List of high-performance CORS proxies for fallback
-            const proxies = [
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+            // 2. Waterfall array of proxies to try
+            const fetchMethods = [
+                // Method A: CodeTabs Proxy (Raw XML)
+                async () => {
+                    const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`);
+                    if (!res.ok) throw new Error(`CodeTabs returned HTTP ${res.status}`);
+                    return await res.text();
+                },
+                // Method B: AllOrigins GET (Wrapped JSON - bypasses dropped CORS headers)
+                async () => {
+                    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
+                    if (!res.ok) throw new Error(`AllOrigins returned HTTP ${res.status}`);
+                    const data = await res.json();
+                    if (!data.contents) throw new Error("AllOrigins missing data contents");
+                    return data.contents;
+                },
+                // Method C: RSS2JSON API (Parsed JSON fallback)
+                async () => {
+                    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                    if (!res.ok) throw new Error(`RSS2JSON returned HTTP ${res.status}`);
+                    const data = await res.json();
+                    if (data.status !== "ok") throw new Error("RSS2JSON returned error status");
+                    return data.items.map(item => ({
+                        id: item.guid.replace('yt:video:', ''),
+                        title: item.title
+                    }));
+                }
             ];
 
-            let xmlText = null;
+            let entries = null;
 
-            for (const getProxyUrl of proxies) {
+            // 3. Try each proxy method sequentially until one succeeds
+            for (let i = 0; i < fetchMethods.length; i++) {
                 try {
-                    const response = await fetch(getProxyUrl(rssUrl));
-                    if (response.ok) {
-                        const text = await response.text();
-                        if (text && text.includes("<feed")) {
-                            xmlText = text;
-                            break;
+                    const result = await fetchMethods[i]();
+                    
+                    if (Array.isArray(result)) {
+                        entries = result; // Success from Method C (pre-parsed array)
+                        break;
+                    } else if (typeof result === 'string' && result.includes('<feed')) {
+                        // Success from Method A or B (requires XML parsing)
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(result, "text/xml");
+                        const entryNodes = xmlDoc.querySelectorAll("entry");
+                        
+                        if (entryNodes && entryNodes.length > 0) {
+                            entries = Array.from(entryNodes).map(entry => {
+                                let videoId = "";
+                                const ytVideoIdNode = entry.getElementsByTagName("yt:videoId")[0];
+                                if (ytVideoIdNode && ytVideoIdNode.textContent) {
+                                    videoId = ytVideoIdNode.textContent.trim();
+                                } else {
+                                    const idNode = entry.getElementsByTagName("id")[0];
+                                    if (idNode && idNode.textContent) {
+                                        videoId = idNode.textContent.replace("yt:video:", "").trim();
+                                    }
+                                }
+                                const titleNode = entry.getElementsByTagName("title")[0];
+                                return {
+                                    id: videoId,
+                                    title: titleNode ? titleNode.textContent.trim() : ""
+                                };
+                            });
+                            break; // Successfully parsed XML
                         }
                     }
                 } catch (err) {
-                    console.warn(`Proxy failed for ${channel.name}, attempting fallback...`, err);
+                    console.warn(`Fetch method ${i + 1} failed for ${channel.name}:`, err.message);
                 }
             }
 
-            if (!xmlText) {
-                throw new Error(`Failed to fetch XML feed for ${channel.name} from all proxies.`);
+            if (!entries || entries.length === 0) {
+                throw new Error(`Failed to fetch XML feed for ${channel.name} from all fallback proxies.`);
             }
 
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            const entryNodes = xmlDoc.querySelectorAll("entry");
+            const feedData = { name: channel.name, entries: entries };
+            
+            // 4. Save to Cache for subsequent loads
+            feedCache[cacheKey] = { timestamp: now, data: feedData };
+            localStorage.setItem(CACHE_KEY_FEEDS, JSON.stringify(feedCache));
 
-            if (!entryNodes || entryNodes.length === 0) {
-                throw new Error("No entries found in XML feed");
-            }
-
-            const entries = Array.from(entryNodes).map(entry => {
-                let videoId = "";
-                const ytVideoIdNode = entry.getElementsByTagName("yt:videoId")[0];
-                if (ytVideoIdNode && ytVideoIdNode.textContent) {
-                    videoId = ytVideoIdNode.textContent.trim();
-                } else {
-                    const idNode = entry.getElementsByTagName("id")[0];
-                    if (idNode && idNode.textContent) {
-                        videoId = idNode.textContent.replace("yt:video:", "").trim();
-                    }
-                }
-
-                const titleNode = entry.getElementsByTagName("title")[0];
-                const publishedNode = entry.getElementsByTagName("published")[0];
-
-                return {
-                    id: videoId,
-                    title: titleNode ? titleNode.textContent.trim() : "",
-                    published: publishedNode ? publishedNode.textContent.trim() : ""
-                };
-            });
-
-            return {
-                name: channel.name,
-                entries: entries
-            };
+            return feedData;
         }
 
         // Orchestrator function to load all channels concurrently
-        async function loadAllFeeds() {
+        async function loadAllFeeds(forceRefresh = false) {
             videoFeed.innerHTML = '<p class="text-slate-500 text-sm italic animate-pulse">Loading latest videos...</p>';
             
             const results = await Promise.all(
                 CHANNELS.map(async (channel) => {
                     try {
-                        const feedData = await fetchFeed(channel);
+                        const feedData = await fetchFeed(channel, forceRefresh);
                         const latestVideo = feedData.entries[0];
                         if (!latestVideo || !latestVideo.id) {
                             throw new Error("No videos found in feed");
@@ -431,7 +460,9 @@
             perfMeta.textContent = `${completedDaysThisMonth} of ${currentDay} days`;
         }
 
-        refreshBtn.addEventListener("click", loadAllFeeds);
+        // Passing 'true' to loadAllFeeds forces it to bypass the local cache
+        refreshBtn.addEventListener("click", () => loadAllFeeds(true));
+        
         loadAllFeeds();
     </script>
 </body>
