@@ -123,34 +123,68 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Refactored to use rss2json API (Bypasses CORS and manual XML parsing entirely)
+        // Native RSS fetcher with fallback proxies and native DOMParser
         async function fetchFeed(channel) {
             if (!channel || !channel.id) {
                 throw new Error("Invalid channel object provided.");
             }
 
             const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-
-            const response = await fetch(apiUrl);
             
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status}`);
+            // List of high-performance CORS proxies for fallback
+            const proxies = [
+                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+            ];
+
+            let xmlText = null;
+
+            for (const getProxyUrl of proxies) {
+                try {
+                    const response = await fetch(getProxyUrl(rssUrl));
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text && text.includes("<feed")) {
+                            xmlText = text;
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    console.warn(`Proxy failed for ${channel.name}, attempting fallback...`, err);
+                }
             }
 
-            const data = await response.json();
-
-            if (data.status !== "ok") {
-                throw new Error(data.message || "Failed to fetch RSS data");
+            if (!xmlText) {
+                throw new Error(`Failed to fetch XML feed for ${channel.name} from all proxies.`);
             }
 
-            const entries = data.items.map(item => {
-                // rss2json returns YouTube GUIDs as "yt:video:ID"
-                const videoId = item.guid.replace('yt:video:', '');
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+            const entryNodes = xmlDoc.querySelectorAll("entry");
+
+            if (!entryNodes || entryNodes.length === 0) {
+                throw new Error("No entries found in XML feed");
+            }
+
+            const entries = Array.from(entryNodes).map(entry => {
+                let videoId = "";
+                const ytVideoIdNode = entry.getElementsByTagName("yt:videoId")[0];
+                if (ytVideoIdNode && ytVideoIdNode.textContent) {
+                    videoId = ytVideoIdNode.textContent.trim();
+                } else {
+                    const idNode = entry.getElementsByTagName("id")[0];
+                    if (idNode && idNode.textContent) {
+                        videoId = idNode.textContent.replace("yt:video:", "").trim();
+                    }
+                }
+
+                const titleNode = entry.getElementsByTagName("title")[0];
+                const publishedNode = entry.getElementsByTagName("published")[0];
+
                 return {
                     id: videoId,
-                    title: item.title,
-                    published: item.pubDate
+                    title: titleNode ? titleNode.textContent.trim() : "",
+                    published: publishedNode ? publishedNode.textContent.trim() : ""
                 };
             });
 
@@ -160,7 +194,7 @@
             };
         }
 
-        // Orchestrator function to load all channels concurrently and structure UI state
+        // Orchestrator function to load all channels concurrently
         async function loadAllFeeds() {
             videoFeed.innerHTML = '<p class="text-slate-500 text-sm italic animate-pulse">Loading latest videos...</p>';
             
