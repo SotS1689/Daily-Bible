@@ -1,0 +1,38 @@
+name: Update video feeds
+
+on:
+  schedule:
+    - cron: "17 * * * *"  # every hour
+  workflow_dispatch:       # "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-feeds
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch feeds
+        run: python scripts/fetch_feeds.py
+
+      - name: Commit feeds.json if it changed
+        run: |
+          if git diff --quiet -- feeds.json && git ls-files --error-unmatch feeds.json >/dev/null 2>&1; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add feeds.json
+          git commit -m "Update video feeds"
+          git push

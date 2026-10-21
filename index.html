@@ -125,12 +125,40 @@
             return `${year}-${month}-${day}`;
         }
 
+        // feeds.json is refreshed hourly by the "Update video feeds" GitHub Action.
+        // Fetched once per load and shared by all channels.
+        let siteFeedsPromise = null;
+        function loadSiteFeeds() {
+            if (!siteFeedsPromise) {
+                siteFeedsPromise = fetch(`feeds.json?t=${Date.now()}`, { cache: "no-store" })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`feeds.json returned HTTP ${res.status}`);
+                        return res.json();
+                    })
+                    .catch(err => {
+                        console.warn("Could not load feeds.json, falling back to proxies:", err.message);
+                        return null;
+                    });
+            }
+            return siteFeedsPromise;
+        }
+
         // Waterfall fetch logic with extreme resilience and caching
         async function fetchFeed(channel, forceRefresh = false) {
             const cacheKey = `feed_${channel.id}`;
             const cached = feedCache[cacheKey];
             const now = Date.now();
             const CACHE_DURATION = 4 * 60 * 60 * 1000; // 4 Hours
+
+            // 0. Primary source: feeds.json on this site (no proxies needed)
+            const siteFeeds = await loadSiteFeeds();
+            const siteFeed = siteFeeds && siteFeeds.feeds && siteFeeds.feeds[channel.id];
+            if (siteFeed && siteFeed.entries && siteFeed.entries.length > 0) {
+                const feedData = { name: channel.name, entries: siteFeed.entries };
+                feedCache[cacheKey] = { timestamp: now, data: feedData };
+                localStorage.setItem(CACHE_KEY_FEEDS, JSON.stringify(feedCache));
+                return feedData;
+            }
 
             // 1. Check local cache (Massively reduces proxy load)
             if (!forceRefresh && cached && (now - cached.timestamp < CACHE_DURATION)) {
@@ -211,6 +239,8 @@
             }
 
             if (!entries || entries.length === 0) {
+                // Better an older video than "Failed to load"
+                if (cached) return cached.data;
                 throw new Error(`Failed to fetch XML feed for ${channel.name} from all fallback proxies.`);
             }
 
@@ -226,7 +256,8 @@
         // Orchestrator function to load all channels concurrently
         async function loadAllFeeds(forceRefresh = false) {
             videoFeed.innerHTML = '<p class="text-slate-500 text-sm italic animate-pulse">Loading latest videos...</p>';
-            
+            siteFeedsPromise = null; // re-read feeds.json on every load/refresh
+
             const results = await Promise.all(
                 CHANNELS.map(async (channel) => {
                     try {
