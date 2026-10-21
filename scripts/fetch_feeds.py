@@ -35,6 +35,10 @@ def fetch_entries(channel_id):
         video_id = entry.findtext("yt:videoId", default="", namespaces=NS).strip()
         title = entry.findtext("atom:title", default="", namespaces=NS).strip()
         published = entry.findtext("atom:published", default="", namespaces=NS).strip()
+        # Shorts link to /shorts/<id> instead of /watch?v=<id>; skip them
+        link = entry.find("atom:link[@rel='alternate']", NS)
+        if link is not None and "/shorts/" in link.get("href", ""):
+            continue
         if video_id:
             entries.append({"id": video_id, "title": title, "published": published})
     return entries

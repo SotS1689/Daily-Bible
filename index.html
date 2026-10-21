@@ -189,7 +189,7 @@
                     if (!res.ok) throw new Error(`RSS2JSON returned HTTP ${res.status}`);
                     const data = await res.json();
                     if (data.status !== "ok") throw new Error("RSS2JSON returned error status");
-                    return data.items.map(item => ({
+                    return data.items.filter(item => !(item.link || "").includes("/shorts/")).map(item => ({
                         id: item.guid.replace('yt:video:', ''),
                         title: item.title
                     }));
@@ -210,8 +210,12 @@
                         // Success from Method A or B (requires XML parsing)
                         const parser = new DOMParser();
                         const xmlDoc = parser.parseFromString(result, "text/xml");
-                        const entryNodes = xmlDoc.querySelectorAll("entry");
-                        
+                        // Skip Shorts, which link to /shorts/<id> instead of /watch?v=<id>
+                        const entryNodes = Array.from(xmlDoc.querySelectorAll("entry")).filter(entry => {
+                            const link = entry.querySelector("link[rel='alternate']");
+                            return !(link && (link.getAttribute("href") || "").includes("/shorts/"));
+                        });
+
                         if (entryNodes && entryNodes.length > 0) {
                             entries = Array.from(entryNodes).map(entry => {
                                 let videoId = "";

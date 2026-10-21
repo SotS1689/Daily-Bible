@@ -1,23 +1,13 @@
 {
-  "updated": "2026-10-21T15:59:25+00:00",
+  "updated": "2026-10-21T16:06:44+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
         {
-          "id": "JI3mssy0keo",
-          "title": "Greek Vocab Day 27 — σημεῖον, τό",
-          "published": "2026-10-21T13:45:38+00:00"
-        },
-        {
           "id": "RTHCxJ4ZHq4",
           "title": "Matthew 23:13",
           "published": "2026-10-21T04:00:33+00:00"
-        },
-        {
-          "id": "Ef946MIgGWM",
-          "title": "Greek Vocab Day 26 — οὐρανός, ὁ",
-          "published": "2026-10-20T13:45:38+00:00"
         },
         {
           "id": "RckRE7N4EaI",
@@ -25,24 +15,9 @@
           "published": "2026-10-20T04:00:20+00:00"
         },
         {
-          "id": "5TedE7fHUdY",
-          "title": "Greek Vocab Day 25 — νόμος, ὁ",
-          "published": "2026-10-19T13:45:02+00:00"
-        },
-        {
           "id": "xLPs67U6kSQ",
           "title": "Matthew 23:11",
           "published": "2026-10-19T04:00:22+00:00"
-        },
-        {
-          "id": "sBt_fZsmapY",
-          "title": "Greek Vocab Day 24 — λόγος, ὁ",
-          "published": "2026-10-18T13:45:26+00:00"
-        },
-        {
-          "id": "BA2lOlHVdTA",
-          "title": "Greek Vocab Day 23 — κύριος, ὁ",
-          "published": "2026-10-17T13:45:09+00:00"
         },
         {
           "id": "vzifAzSnl0A",
@@ -50,29 +25,14 @@
           "published": "2026-10-17T04:00:29+00:00"
         },
         {
-          "id": "ds0HokU3isM",
-          "title": "Greek Vocab Day 22 — κόσμος, ὁ",
-          "published": "2026-10-16T13:45:35+00:00"
-        },
-        {
           "id": "MtSvipvHFnk",
           "title": "Matthew 23:10",
           "published": "2026-10-16T04:00:07+00:00"
         },
         {
-          "id": "iHyKFIiiPRY",
-          "title": "Greek Vocab Day 21 — ἱερόν, τό",
-          "published": "2026-10-15T13:45:21+00:00"
-        },
-        {
           "id": "E3WVGCGymuk",
           "title": "Matthew 23:9",
           "published": "2026-10-15T04:00:01+00:00"
-        },
-        {
-          "id": "AzzlYlY2LE4",
-          "title": "Greek Vocab Day 20 — θεός, ὁ",
-          "published": "2026-10-14T13:45:02+00:00"
         },
         {
           "id": "rmRkBuvLm4w",
@@ -85,19 +45,9 @@
       "name": "Daily Dose of Hebrew",
       "entries": [
         {
-          "id": "Ph4TBLiW09A",
-          "title": "Hebrew Vocab Day 27 — עַם",
-          "published": "2026-10-21T13:45:30+00:00"
-        },
-        {
           "id": "iM_p1t4yXZ4",
           "title": "Nehemiah 5:13a",
           "published": "2026-10-21T04:00:15+00:00"
-        },
-        {
-          "id": "OP4n4-BH-Sk",
-          "title": "Hebrew Vocab Day 26 — נָתַן",
-          "published": "2026-10-20T13:45:38+00:00"
         },
         {
           "id": "lZpNU9iWldk",
@@ -105,24 +55,9 @@
           "published": "2026-10-20T04:00:31+00:00"
         },
         {
-          "id": "r1JxJMjMn8Q",
-          "title": "Hebrew Vocab Day 25 — בַּ֫יִת",
-          "published": "2026-10-19T13:45:39+00:00"
-        },
-        {
           "id": "Mv3YL7AqNw0",
           "title": "Nehemiah 5:11",
           "published": "2026-10-19T04:00:25+00:00"
-        },
-        {
-          "id": "WWcmmOJZpZA",
-          "title": "Hebrew Vocab Day 24 — פָּנִים",
-          "published": "2026-10-18T13:45:09+00:00"
-        },
-        {
-          "id": "w78tBMLnYPo",
-          "title": "Hebrew Vocab Day 23 — אִישׁ",
-          "published": "2026-10-17T13:45:25+00:00"
         },
         {
           "id": "nbF26g2pqvE",
@@ -130,29 +65,14 @@
           "published": "2026-10-17T04:00:00+00:00"
         },
         {
-          "id": "kBwBvWxAQOo",
-          "title": "Hebrew Vocab Day 22 — יוֹם",
-          "published": "2026-10-16T13:45:25+00:00"
-        },
-        {
           "id": "Eu89elPb1iA",
           "title": "Nehemiah 5:10",
           "published": "2026-10-16T04:00:12+00:00"
         },
         {
-          "id": "fcAuoOSXuVo",
-          "title": "Hebrew Vocab Day 21 — אֶ֫רֶץ",
-          "published": "2026-10-15T13:45:20+00:00"
-        },
-        {
           "id": "cD0nJVDe2CM",
           "title": "Nehemiah 5:9",
           "published": "2026-10-15T04:00:26+00:00"
-        },
-        {
-          "id": "nmugcK7U7JI",
-          "title": "Hebrew Vocab Day 20 — מֶ֫לֶךְ",
-          "published": "2026-10-14T13:45:32+00:00"
         },
         {
           "id": "6AKiewfah7U",
