@@ -1,9 +1,14 @@
 {
-  "updated": "2026-10-25T16:27:56+00:00",
+  "updated": "2026-10-26T14:20:27+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "5QAomgW-ixc",
+          "title": "Matthew 23:16",
+          "published": "2026-10-26T04:00:01+00:00"
+        },
         {
           "id": "BmBPNkWxz0g",
           "title": "Dr. Stephen Westerholm on Romans 4",
@@ -40,6 +45,11 @@
       "name": "Daily Dose of Hebrew",
       "entries": [
         {
+          "id": "8yI1y4l8JVk",
+          "title": "Nehemiah 5:15",
+          "published": "2026-10-26T04:00:06+00:00"
+        },
+        {
           "id": "ldRuUXKVKy0",
           "title": "Proverbs 4:10",
           "published": "2026-10-24T04:00:20+00:00"
@@ -74,6 +84,11 @@
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "msynbkYsMnY",
+          "title": "Genesis 1:31 Latin Vulgate",
+          "published": "2026-10-26T04:00:06+00:00"
+        },
         {
           "id": "rcB41g-kZ8k",
           "title": "Genesis 1:30 Latin Vulgate",
@@ -143,17 +158,17 @@
           "id": "Q35BSjhOWyo",
           "title": "Genesis 1:17 Latin Vulgate",
           "published": "2026-10-06T04:00:08+00:00"
-        },
-        {
-          "id": "lT1kWuo3c0U",
-          "title": "Genesis 1:16 Latin Vulgate",
-          "published": "2026-10-05T04:00:11+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "A470EbyGvVE",
+          "title": "Genesis 15:1 Septuagint",
+          "published": "2026-10-26T04:00:07+00:00"
+        },
         {
           "id": "Gk8HfgaF8lw",
           "title": "The Oxford Handbook of the Septuagint",
@@ -223,11 +238,6 @@
           "id": "CbU3okye5a4",
           "title": "Genesis 14:12 Septuagint",
           "published": "2026-10-09T04:00:19+00:00"
-        },
-        {
-          "id": "rwuI_uSKKC4",
-          "title": "Genesis 14:1-2 Septuagint",
-          "published": "2026-10-08T04:00:20+00:00"
         }
       ]
     }
