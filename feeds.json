@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-26T14:20:27+00:00",
+  "updated": "2026-10-27T06:20:10+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
@@ -165,6 +165,11 @@
       "name": "Daily Dose of Septuagint",
       "entries": [
         {
+          "id": "Hck1tGVLcSA",
+          "title": "Genesis 15:2 Septuagint",
+          "published": "2026-10-27T04:00:31+00:00"
+        },
+        {
           "id": "A470EbyGvVE",
           "title": "Genesis 15:1 Septuagint",
           "published": "2026-10-26T04:00:07+00:00"
@@ -233,11 +238,6 @@
           "id": "MNMDV2q0hqw",
           "title": "Translating the Septuagint Translation Part 2: LES",
           "published": "2026-10-10T04:00:27+00:00"
-        },
-        {
-          "id": "CbU3okye5a4",
-          "title": "Genesis 14:12 Septuagint",
-          "published": "2026-10-09T04:00:19+00:00"
         }
       ]
     }
