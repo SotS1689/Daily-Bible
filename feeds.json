@@ -1,9 +1,14 @@
 {
-  "updated": "2026-10-27T06:20:10+00:00",
+  "updated": "2026-10-27T13:16:18+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "iMx-56o9PnA",
+          "title": "Matthew 23:17",
+          "published": "2026-10-27T04:00:16+00:00"
+        },
         {
           "id": "5QAomgW-ixc",
           "title": "Matthew 23:16",
@@ -33,17 +38,17 @@
           "id": "RckRE7N4EaI",
           "title": "Matthew 23:12",
           "published": "2026-10-20T04:00:20+00:00"
-        },
-        {
-          "id": "xLPs67U6kSQ",
-          "title": "Matthew 23:11",
-          "published": "2026-10-19T04:00:22+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "QJRKCdhPY9M",
+          "title": "Nehemiah 5:16",
+          "published": "2026-10-27T04:00:16+00:00"
+        },
         {
           "id": "8yI1y4l8JVk",
           "title": "Nehemiah 5:15",
@@ -73,17 +78,17 @@
           "id": "lZpNU9iWldk",
           "title": "Nehemiah 5:12",
           "published": "2026-10-20T04:00:31+00:00"
-        },
-        {
-          "id": "Mv3YL7AqNw0",
-          "title": "Nehemiah 5:11",
-          "published": "2026-10-19T04:00:25+00:00"
         }
       ]
     },
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "rlnk2J_fJG8",
+          "title": "Ruth 1:1 Latin Vulgate",
+          "published": "2026-10-27T04:00:12+00:00"
+        },
         {
           "id": "msynbkYsMnY",
           "title": "Genesis 1:31 Latin Vulgate",
@@ -153,11 +158,6 @@
           "id": "iGFSZ1F-rrM",
           "title": "Genesis 1:18 Latin Vulgate",
           "published": "2026-10-07T04:00:30+00:00"
-        },
-        {
-          "id": "Q35BSjhOWyo",
-          "title": "Genesis 1:17 Latin Vulgate",
-          "published": "2026-10-06T04:00:08+00:00"
         }
       ]
     },
