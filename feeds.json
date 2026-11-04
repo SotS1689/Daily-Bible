@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-04T09:21:32+00:00",
+  "updated": "2026-11-04T18:00:32+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
@@ -85,6 +85,11 @@
       "name": "Daily Dose of Latin",
       "entries": [
         {
+          "id": "yJfUhuTedTM",
+          "title": "Ruth 1:7 Latin Vulgate",
+          "published": "2026-11-04T13:21:05+00:00"
+        },
+        {
           "id": "W3oUpzwBcDI",
           "title": "Ruth 1:6 Latin Vulgate",
           "published": "2026-11-03T05:00:39+00:00"
@@ -153,11 +158,6 @@
           "id": "hBnh6bEhd1c",
           "title": "Genesis 1:24 Latin Vulgate",
           "published": "2026-10-15T04:00:35+00:00"
-        },
-        {
-          "id": "X4lO-OfakH8",
-          "title": "Genesis 1:23 Latin Vulgate",
-          "published": "2026-10-14T04:00:24+00:00"
         }
       ]
     },
