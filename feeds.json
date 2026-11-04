@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-03T15:14:31+00:00",
+  "updated": "2026-11-04T09:21:32+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "am8DoyGHQg0",
+          "title": "Matthew 23:23",
+          "published": "2026-11-04T05:00:27+00:00"
+        },
         {
           "id": "2LHB-MbVvLw",
           "title": "Matthew 23:22",
@@ -33,17 +38,17 @@
           "id": "7njyva54Nts",
           "title": "Matthew 23:18",
           "published": "2026-10-28T04:00:26+00:00"
-        },
-        {
-          "id": "iMx-56o9PnA",
-          "title": "Matthew 23:17",
-          "published": "2026-10-27T04:00:16+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "NcySF5n6JKo",
+          "title": "Nehemiah 6:2",
+          "published": "2026-11-04T05:00:22+00:00"
+        },
         {
           "id": "ENZJViuxwaQ",
           "title": "Nehemiah 6:1",
@@ -73,11 +78,6 @@
           "id": "en9aNYC83M4",
           "title": "Nehemiah 5:17",
           "published": "2026-10-28T04:00:01+00:00"
-        },
-        {
-          "id": "QJRKCdhPY9M",
-          "title": "Nehemiah 5:16",
-          "published": "2026-10-27T04:00:16+00:00"
         }
       ]
     },
@@ -165,6 +165,11 @@
       "name": "Daily Dose of Septuagint",
       "entries": [
         {
+          "id": "ddj3Du8w6II",
+          "title": "Genesis 15:10 Septuagint",
+          "published": "2026-11-04T05:00:09+00:00"
+        },
+        {
           "id": "Wc8ixoPH2zY",
           "title": "Genesis 15:9 Septuagint",
           "published": "2026-11-03T05:00:26+00:00"
@@ -233,11 +238,6 @@
           "id": "6MfDhe-Qnsc",
           "title": "Genesis 14:18 Septuagint",
           "published": "2026-10-19T04:00:17+00:00"
-        },
-        {
-          "id": "uwEfa8i4H3Y",
-          "title": "Translating the Septuagint Translation Part 3: German, French, and Spanish",
-          "published": "2026-10-17T04:00:17+00:00"
         }
       ]
     }
