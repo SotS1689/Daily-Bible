@@ -22,7 +22,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      # A failed fetch leaves feeds.json unchanged; don't fail the run (and send an email) over it.
       - name: Fetch feeds
+        continue-on-error: true
         run: python scripts/fetch_feeds.py
 
       - name: Commit feeds.json if it changed
