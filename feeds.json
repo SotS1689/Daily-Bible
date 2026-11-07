@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-06T10:58:47+00:00",
+  "updated": "2026-11-07T10:18:19+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "FjsyPJVa304",
+          "title": "Kevilex.com for the LXX! (and many other ancient Greek texts!)",
+          "published": "2026-11-07T05:00:18+00:00"
+        },
         {
           "id": "rXRhDwnuiGk",
           "title": "Matthew 23:25",
@@ -33,17 +38,17 @@
           "id": "J1gCf2Ujo08",
           "title": "1 Thessalonians Greek Reading Course with Dr. Plummer",
           "published": "2026-11-01T23:47:42+00:00"
-        },
-        {
-          "id": "_a4BMD3KAHs",
-          "title": "Matthew 23:20",
-          "published": "2026-10-30T04:00:32+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "cJMKh4wgFd8",
+          "title": "Daily Dose of Hebrew in Portuguese",
+          "published": "2026-11-07T05:00:13+00:00"
+        },
         {
           "id": "4dSyYS2Z7gg",
           "title": "Nehemiah 6:4",
@@ -73,11 +78,6 @@
           "id": "MBo90X0K3yU",
           "title": "Proverbs 4:11",
           "published": "2026-10-31T04:00:37+00:00"
-        },
-        {
-          "id": "tjfsoHzIqFo",
-          "title": "Nehemiah 5:18b",
-          "published": "2026-10-30T04:00:14+00:00"
         }
       ]
     },
@@ -165,6 +165,11 @@
       "name": "Daily Dose of Septuagint",
       "entries": [
         {
+          "id": "XGBRRMynBOQ",
+          "title": "P. Ryl. 458 — Oldest Greek Copy of Deuteronomy",
+          "published": "2026-11-07T05:00:39+00:00"
+        },
+        {
           "id": "p4YEPEznrWY",
           "title": "Genesis 15:13 Septuagint",
           "published": "2026-11-06T05:00:14+00:00"
@@ -233,11 +238,6 @@
           "id": "ObdKb_ORufk",
           "title": "Genesis 14:21–22 Septuagint",
           "published": "2026-10-22T04:00:24+00:00"
-        },
-        {
-          "id": "wcjP5JLA8QE",
-          "title": "Genesis 14:20 Septuagint",
-          "published": "2026-10-21T04:00:26+00:00"
         }
       ]
     }
