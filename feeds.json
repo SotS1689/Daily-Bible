@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-08T15:17:18+00:00",
+  "updated": "2026-11-09T08:00:17+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "PLypHpa69GA",
+          "title": "Matthew 23:26",
+          "published": "2026-11-09T05:00:36+00:00"
+        },
         {
           "id": "FjsyPJVa304",
           "title": "Kevilex.com for the LXX! (and many other ancient Greek texts!)",
@@ -45,6 +50,11 @@
       "name": "Daily Dose of Hebrew",
       "entries": [
         {
+          "id": "rfqf6vbA6NY",
+          "title": "Nehemiah 6:5",
+          "published": "2026-11-09T05:00:29+00:00"
+        },
+        {
           "id": "cJMKh4wgFd8",
           "title": "Daily Dose of Hebrew in Portuguese",
           "published": "2026-11-07T05:00:13+00:00"
@@ -79,6 +89,11 @@
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "_W0UkW6XjgA",
+          "title": "Ruth 1:10 Latin Vulgate",
+          "published": "2026-11-09T05:00:03+00:00"
+        },
         {
           "id": "1inlE7SCyxw",
           "title": "Ruth 1:9 Latin Vulgate",
@@ -148,17 +163,17 @@
           "id": "IcTKWXMUa9Q",
           "title": "Genesis 1:27 Latin Vulgate",
           "published": "2026-10-20T04:00:28+00:00"
-        },
-        {
-          "id": "-W0lXFC3n6o",
-          "title": "Genesis 1:26 Latin Vulgate",
-          "published": "2026-10-19T04:00:02+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "YswLvr5lIvA",
+          "title": "Genesis 15:14 Septuagint",
+          "published": "2026-11-09T05:00:10+00:00"
+        },
         {
           "id": "XGBRRMynBOQ",
           "title": "P. Ryl. 458 — Oldest Greek Copy of Deuteronomy",
@@ -228,11 +243,6 @@
           "id": "7gK8UbiSjvY",
           "title": "Genesis 14:23 Septuagint",
           "published": "2026-10-23T04:00:03+00:00"
-        },
-        {
-          "id": "ObdKb_ORufk",
-          "title": "Genesis 14:21–22 Septuagint",
-          "published": "2026-10-22T04:00:24+00:00"
         }
       ]
     }
