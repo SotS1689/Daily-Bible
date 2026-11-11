@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-10T09:55:49+00:00",
+  "updated": "2026-11-11T15:17:41+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "x_0FeWyRLkY",
+          "title": "Matthew 23:28",
+          "published": "2026-11-11T05:00:25+00:00"
+        },
         {
           "id": "2DghxqijF5A",
           "title": "Matthew 23:27",
@@ -33,17 +38,17 @@
           "id": "am8DoyGHQg0",
           "title": "Matthew 23:23",
           "published": "2026-11-04T05:00:27+00:00"
-        },
-        {
-          "id": "2LHB-MbVvLw",
-          "title": "Matthew 23:22",
-          "published": "2026-11-03T05:00:09+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "cbK6oMzBd3Y",
+          "title": "Nehemiah 6:7",
+          "published": "2026-11-11T05:00:02+00:00"
+        },
         {
           "id": "SleDPUkjDFQ",
           "title": "Nehemiah 6:6",
@@ -73,17 +78,17 @@
           "id": "NcySF5n6JKo",
           "title": "Nehemiah 6:2",
           "published": "2026-11-04T05:00:22+00:00"
-        },
-        {
-          "id": "ENZJViuxwaQ",
-          "title": "Nehemiah 6:1",
-          "published": "2026-11-03T05:00:18+00:00"
         }
       ]
     },
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "3YDpRoOz52s",
+          "title": "Ruth 1:12 Latin Vulgate",
+          "published": "2026-11-11T05:00:06+00:00"
+        },
         {
           "id": "QMh56oWQKco",
           "title": "Ruth 1:11 Latin Vulgate",
@@ -153,17 +158,17 @@
           "id": "YnGT9_MQuAw",
           "title": "Genesis 1:29 Latin Vulgate",
           "published": "2026-10-22T04:00:38+00:00"
-        },
-        {
-          "id": "kXtwfTlFS-0",
-          "title": "Genesis 1:28 Latin Vulgate",
-          "published": "2026-10-21T04:00:40+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "zDC2W8yE2pY",
+          "title": "Genesis 15:17 Septuagint",
+          "published": "2026-11-11T05:00:17+00:00"
+        },
         {
           "id": "zL3h-HDyQ2w",
           "title": "Genesis 15:15–16 Septuagint",
@@ -233,11 +238,6 @@
           "id": "A470EbyGvVE",
           "title": "Genesis 15:1 Septuagint",
           "published": "2026-10-26T04:00:07+00:00"
-        },
-        {
-          "id": "Gk8HfgaF8lw",
-          "title": "The Oxford Handbook of the Septuagint",
-          "published": "2026-10-24T04:00:19+00:00"
         }
       ]
     }
