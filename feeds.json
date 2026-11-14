@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-13T09:36:37+00:00",
+  "updated": "2026-11-14T14:12:01+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "nZ4qVjIC2HA",
+          "title": "Annual Report, Invitation to Give, New Daily Dose Ornament!",
+          "published": "2026-11-14T05:00:37+00:00"
+        },
         {
           "id": "W3lKB2G7j_o",
           "title": "Matthew 23:30",
@@ -33,17 +38,17 @@
           "id": "FjsyPJVa304",
           "title": "Kevilex.com for the LXX! (and many other ancient Greek texts!)",
           "published": "2026-11-07T05:00:18+00:00"
-        },
-        {
-          "id": "rXRhDwnuiGk",
-          "title": "Matthew 23:25",
-          "published": "2026-11-06T05:00:15+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "1JhFC3B7x9M",
+          "title": "God’s Ancient Library: Explore Hebrew Scrolls",
+          "published": "2026-11-14T05:00:16+00:00"
+        },
         {
           "id": "rExH2vICTvY",
           "title": "Nehemiah 6:9",
@@ -73,11 +78,6 @@
           "id": "cJMKh4wgFd8",
           "title": "Daily Dose of Hebrew in Portuguese",
           "published": "2026-11-07T05:00:13+00:00"
-        },
-        {
-          "id": "4dSyYS2Z7gg",
-          "title": "Nehemiah 6:4",
-          "published": "2026-11-06T05:00:03+00:00"
         }
       ]
     },
@@ -165,6 +165,11 @@
       "name": "Daily Dose of Septuagint",
       "entries": [
         {
+          "id": "Wo7FQ0ScgKU",
+          "title": "Genesis 16 Extended Cut Septuagint",
+          "published": "2026-11-14T05:00:34+00:00"
+        },
+        {
           "id": "Tn1mej2en5w",
           "title": "Genesis 15:19–21 Septuagint",
           "published": "2026-11-13T05:00:07+00:00"
@@ -233,11 +238,6 @@
           "id": "Gs-9Y-3r2uc",
           "title": "Genesis 15:5 Septuagint",
           "published": "2026-10-29T04:00:33+00:00"
-        },
-        {
-          "id": "EswXsr5XQ0A",
-          "title": "Genesis 15:3–4 Septuagint",
-          "published": "2026-10-28T04:00:09+00:00"
         }
       ]
     }
