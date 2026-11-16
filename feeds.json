@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-15T17:46:22+00:00",
+  "updated": "2026-11-16T11:30:07+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "bSO1Pqwnx00",
+          "title": "Matthew 23:31",
+          "published": "2026-11-16T05:00:00+00:00"
+        },
         {
           "id": "nZ4qVjIC2HA",
           "title": "Annual Report, Invitation to Give, New Daily Dose Ornament!",
@@ -40,6 +45,11 @@
       "name": "Daily Dose of Hebrew",
       "entries": [
         {
+          "id": "1A7SWLDlcVc",
+          "title": "Nehemiah 6:10",
+          "published": "2026-11-16T05:00:12+00:00"
+        },
+        {
           "id": "1JhFC3B7x9M",
           "title": "God’s Ancient Library: Explore Hebrew Scrolls",
           "published": "2026-11-14T05:00:16+00:00"
@@ -74,6 +84,11 @@
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "bLwYMQ8yHDE",
+          "title": "Ruth 1:15 Latin Vulgate",
+          "published": "2026-11-16T05:00:19+00:00"
+        },
         {
           "id": "M4Cn2X3nTzs",
           "title": "Ruth 1:14 Latin Vulgate",
@@ -143,17 +158,17 @@
           "id": "rlnk2J_fJG8",
           "title": "Ruth 1:1 Latin Vulgate",
           "published": "2026-10-27T04:00:12+00:00"
-        },
-        {
-          "id": "msynbkYsMnY",
-          "title": "Genesis 1:31 Latin Vulgate",
-          "published": "2026-10-26T04:00:06+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "_1gXC1l8za0",
+          "title": "Psalm 34(33):1–2 Septuagint",
+          "published": "2026-11-16T05:00:05+00:00"
+        },
         {
           "id": "Wo7FQ0ScgKU",
           "title": "Genesis 16 Extended Cut Septuagint",
@@ -223,11 +238,6 @@
           "id": "z5UhdxIlWdQ",
           "title": "Genesis 15:6 Septuagint",
           "published": "2026-10-30T04:00:39+00:00"
-        },
-        {
-          "id": "Gs-9Y-3r2uc",
-          "title": "Genesis 15:5 Septuagint",
-          "published": "2026-10-29T04:00:33+00:00"
         }
       ]
     }
