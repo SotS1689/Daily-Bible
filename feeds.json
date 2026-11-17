@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-16T11:30:07+00:00",
+  "updated": "2026-11-17T14:29:54+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "Yr4H6udf09E",
+          "title": "Matthew 23:32",
+          "published": "2026-11-17T05:00:24+00:00"
+        },
         {
           "id": "bSO1Pqwnx00",
           "title": "Matthew 23:31",
@@ -33,17 +38,17 @@
           "id": "2DghxqijF5A",
           "title": "Matthew 23:27",
           "published": "2026-11-10T05:00:20+00:00"
-        },
-        {
-          "id": "PLypHpa69GA",
-          "title": "Matthew 23:26",
-          "published": "2026-11-09T05:00:36+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "UVvdQF1NVxw",
+          "title": "Nehemiah 6:11",
+          "published": "2026-11-17T05:00:29+00:00"
+        },
         {
           "id": "1A7SWLDlcVc",
           "title": "Nehemiah 6:10",
@@ -73,17 +78,17 @@
           "id": "SleDPUkjDFQ",
           "title": "Nehemiah 6:6",
           "published": "2026-11-10T05:00:33+00:00"
-        },
-        {
-          "id": "rfqf6vbA6NY",
-          "title": "Nehemiah 6:5",
-          "published": "2026-11-09T05:00:29+00:00"
         }
       ]
     },
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "zAPq7E1kd6k",
+          "title": "Ruth 1:16 Latin Vulgate",
+          "published": "2026-11-17T05:00:39+00:00"
+        },
         {
           "id": "bLwYMQ8yHDE",
           "title": "Ruth 1:15 Latin Vulgate",
@@ -153,17 +158,17 @@
           "id": "_6YIhRIyyw8",
           "title": "Ruth 1:2 Latin Vulgate",
           "published": "2026-10-28T04:00:35+00:00"
-        },
-        {
-          "id": "rlnk2J_fJG8",
-          "title": "Ruth 1:1 Latin Vulgate",
-          "published": "2026-10-27T04:00:12+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "GN-W_Wu7sak",
+          "title": "Psalm 34(33):3–4 Septuagint",
+          "published": "2026-11-17T05:00:25+00:00"
+        },
         {
           "id": "_1gXC1l8za0",
           "title": "Psalm 34(33):1–2 Septuagint",
@@ -233,11 +238,6 @@
           "id": "wPp-gTrmFPM",
           "title": "Use of Genesis 15:6 in the New Testament and Elsewhere",
           "published": "2026-10-31T04:00:20+00:00"
-        },
-        {
-          "id": "z5UhdxIlWdQ",
-          "title": "Genesis 15:6 Septuagint",
-          "published": "2026-10-30T04:00:39+00:00"
         }
       ]
     }
