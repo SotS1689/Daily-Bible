@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-22T15:23:35+00:00",
+  "updated": "2026-11-23T12:55:25+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "RJ22O1q-_ck",
+          "title": "Matthew 23:36",
+          "published": "2026-11-23T05:00:08+00:00"
+        },
         {
           "id": "Lbn-kMk7fDQ",
           "title": "Free Greek & Hebrew Learning App from Ligua Deo Gloria",
@@ -39,6 +44,11 @@
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "J4yUpWXTyFE",
+          "title": "Nehemiah 6:15",
+          "published": "2026-11-23T05:00:06+00:00"
+        },
         {
           "id": "u6g2478Q2z4",
           "title": "Free Hebrew Learning App from Lingua Deo Gloria",
@@ -78,17 +88,17 @@
           "id": "rExH2vICTvY",
           "title": "Nehemiah 6:9",
           "published": "2026-11-13T05:00:32+00:00"
-        },
-        {
-          "id": "Zzd3KJc6ZiQ",
-          "title": "Nehemiah 6:8",
-          "published": "2026-11-12T05:00:03+00:00"
         }
       ]
     },
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "5vxNjTNGwp4",
+          "title": "Ruth 1:20 Latin Vulgate",
+          "published": "2026-11-23T05:00:18+00:00"
+        },
         {
           "id": "EPbX7f-7Egw",
           "title": "Ruth 1:19 Latin Vulgate",
@@ -158,17 +168,17 @@
           "id": "W3oUpzwBcDI",
           "title": "Ruth 1:6 Latin Vulgate",
           "published": "2026-11-03T05:00:39+00:00"
-        },
-        {
-          "id": "BaE0zlLEV90",
-          "title": "Ruth 1:5 Latin Vulgate",
-          "published": "2026-11-02T05:00:15+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "ieWAxCFC7XM",
+          "title": "Psalm 34(33):11–12 Septuagint",
+          "published": "2026-11-23T05:00:16+00:00"
+        },
         {
           "id": "Zrif0qZP7ps",
           "title": "Septuagint Discourse Analysis",
@@ -238,11 +248,6 @@
           "id": "p4YEPEznrWY",
           "title": "Genesis 15:13 Septuagint",
           "published": "2026-11-06T05:00:14+00:00"
-        },
-        {
-          "id": "OneLbPzTg9Q",
-          "title": "Genesis 15:12 Septuagint",
-          "published": "2026-11-05T05:00:35+00:00"
         }
       ]
     }
