@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-23T12:55:25+00:00",
+  "updated": "2026-11-24T10:59:35+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "bzRQp3yLSog",
+          "title": "Matthew 23:37",
+          "published": "2026-11-24T05:00:32+00:00"
+        },
         {
           "id": "RJ22O1q-_ck",
           "title": "Matthew 23:36",
@@ -33,17 +38,17 @@
           "id": "Yr4H6udf09E",
           "title": "Matthew 23:32",
           "published": "2026-11-17T05:00:24+00:00"
-        },
-        {
-          "id": "bSO1Pqwnx00",
-          "title": "Matthew 23:31",
-          "published": "2026-11-16T05:00:00+00:00"
         }
       ]
     },
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "4HoPajWI8-4",
+          "title": "Nehemiah 6:16a",
+          "published": "2026-11-24T05:00:01+00:00"
+        },
         {
           "id": "J4yUpWXTyFE",
           "title": "Nehemiah 6:15",
@@ -94,6 +99,11 @@
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "OLSF6ROAf38",
+          "title": "Ruth 1:21 Latin Vulgate",
+          "published": "2026-11-24T05:00:11+00:00"
+        },
         {
           "id": "5vxNjTNGwp4",
           "title": "Ruth 1:20 Latin Vulgate",
@@ -163,17 +173,17 @@
           "id": "yJfUhuTedTM",
           "title": "Ruth 1:7 Latin Vulgate",
           "published": "2026-11-04T13:21:05+00:00"
-        },
-        {
-          "id": "W3oUpzwBcDI",
-          "title": "Ruth 1:6 Latin Vulgate",
-          "published": "2026-11-03T05:00:39+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "gny1YyXC7rg",
+          "title": "Psalm 34(33):13–14 Septuagint",
+          "published": "2026-11-24T05:00:23+00:00"
+        },
         {
           "id": "ieWAxCFC7XM",
           "title": "Psalm 34(33):11–12 Septuagint",
@@ -243,11 +253,6 @@
           "id": "XGBRRMynBOQ",
           "title": "P. Ryl. 458 — Oldest Greek Copy of Deuteronomy",
           "published": "2026-11-07T05:00:39+00:00"
-        },
-        {
-          "id": "p4YEPEznrWY",
-          "title": "Genesis 15:13 Septuagint",
-          "published": "2026-11-06T05:00:14+00:00"
         }
       ]
     }
