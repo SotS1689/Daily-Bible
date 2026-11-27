@@ -1,9 +1,14 @@
 {
-  "updated": "2026-11-26T09:35:20+00:00",
+  "updated": "2026-11-27T12:31:05+00:00",
   "feeds": {
     "UCRSbS2XhqOhnSUzWfGHUkLg": {
       "name": "Daily Dose of Greek",
       "entries": [
+        {
+          "id": "lL61APklutU",
+          "title": "Matthew 24:1",
+          "published": "2026-11-27T05:00:17+00:00"
+        },
         {
           "id": "-5RAUI2eccw",
           "title": "Matthew 23:39",
@@ -49,6 +54,11 @@
     "UC0fRqEfY1ZaiWiJWTj7HQng": {
       "name": "Daily Dose of Hebrew",
       "entries": [
+        {
+          "id": "ZmsT_uv1rS4",
+          "title": "Nehemiah 6:18",
+          "published": "2026-11-27T05:00:30+00:00"
+        },
         {
           "id": "IiSJYi1dW9E",
           "title": "Nehemiah 6:17",
@@ -98,17 +108,17 @@
           "id": "1A7SWLDlcVc",
           "title": "Nehemiah 6:10",
           "published": "2026-11-16T05:00:12+00:00"
-        },
-        {
-          "id": "1JhFC3B7x9M",
-          "title": "God’s Ancient Library: Explore Hebrew Scrolls",
-          "published": "2026-11-14T05:00:16+00:00"
         }
       ]
     },
     "UCMldVrQ8rKkWyevvQonijoA": {
       "name": "Daily Dose of Latin",
       "entries": [
+        {
+          "id": "r3eptg2eWpU",
+          "title": "Ruth 2:2 Latin Vulgate",
+          "published": "2026-11-27T05:00:31+00:00"
+        },
         {
           "id": "jLDXkqUzk9c",
           "title": "Ruth 2:1 Latin Vulgate",
@@ -178,17 +188,17 @@
           "id": "_W0UkW6XjgA",
           "title": "Ruth 1:10 Latin Vulgate",
           "published": "2026-11-09T05:00:03+00:00"
-        },
-        {
-          "id": "1inlE7SCyxw",
-          "title": "Ruth 1:9 Latin Vulgate",
-          "published": "2026-11-06T05:00:18+00:00"
         }
       ]
     },
     "UC5SB4egyj9-RNdjL-VxcDRw": {
       "name": "Daily Dose of Septuagint",
       "entries": [
+        {
+          "id": "cZmUJvkHKKE",
+          "title": "Psalm 34(33):19–20 Septuagint",
+          "published": "2026-11-27T05:00:21+00:00"
+        },
         {
           "id": "GmpIgHW79U0",
           "title": "Psalm 34(33):17–18 Septuagint",
@@ -258,11 +268,6 @@
           "id": "zDC2W8yE2pY",
           "title": "Genesis 15:17 Septuagint",
           "published": "2026-11-11T05:00:17+00:00"
-        },
-        {
-          "id": "zL3h-HDyQ2w",
-          "title": "Genesis 15:15–16 Septuagint",
-          "published": "2026-11-10T05:00:19+00:00"
         }
       ]
     }
